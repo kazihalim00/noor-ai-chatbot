@@ -3,6 +3,7 @@ Project Name: Noor-AI Islamic Assistant
 Author: Kazi Abdul Halim Sunny
 Date: November 2025
 Description: An AI-powered Islamic chatbot using Google Gemini Pro.
+Features: Bengali Support, Depression Care, Chat History Download, Developer Logging.
 """
 
 import streamlit as st
@@ -81,18 +82,15 @@ def configure_api():
     - On Streamlit Cloud: It reads from 'secrets'.
     - On Local Machine: It uses the fallback placeholder.
     """
-    # ⚠️ IMPORTANT: For Public GitHub, keep this placeholder!
-    # Do NOT put your real key here if repo is Public.
+    # ⚠️ PLACEHOLDER FOR GITHUB SECURITY
     local_key = "YOUR_API_KEY_HERE"
     
     try:
-        # Try to access secrets (Works on Cloud or if secrets.toml exists)
         if hasattr(st, "secrets") and "GOOGLE_API_KEY" in st.secrets:
             api_key = st.secrets["GOOGLE_API_KEY"]
         else:
-            raise FileNotFoundError # Fallback to local
+            raise FileNotFoundError 
     except:
-        # Fallback (User must replace this LOCALLY to test, but keep placeholder for Git)
         api_key = local_key
 
     genai.configure(api_key=api_key)
@@ -134,7 +132,7 @@ def initialize_session():
         except Exception as e:
             st.error(f"Failed to initialize AI model: {e}")
 
-# --- 6. DISPLAY SIDEBAR ---
+# --- 6. DISPLAY SIDEBAR (WITH DOWNLOAD BUTTON) ---
 def display_sidebar():
     with st.sidebar:
         st.title("🌙 Noor-AI")
@@ -144,38 +142,51 @@ def display_sidebar():
         st.markdown("---")
         st.info("Guidance based on Qur'an & Authentic Sunnah.")
         st.warning("Please consult a local scholar for specific Fiqh rulings.")
+        
+        st.markdown("---")
+        
+        # --- DOWNLOAD CHAT HISTORY LOGIC ---
+        if st.session_state.history:
+            chat_str = "--- Noor-AI Chat History ---\n\n"
+            for msg in st.session_state.history:
+                role = "User" if msg["role"] == "user" else "Noor-AI"
+                chat_str += f"{role}: {msg['content']}\n\n"
+            
+            st.download_button(
+                label="📥 Download Chat",
+                data=chat_str,
+                file_name="noor_ai_chat.txt",
+                mime="text/plain"
+            )
 
 # --- 7. MAIN APP FUNCTION ---
 def main():
-    # Setup
     setup_page_config()
     apply_custom_styles()
     configure_api()
     initialize_session()
     display_sidebar()
 
-    # Header
     st.title("Noor-AI Assistant") 
     st.markdown("### Guidance from Qur'an & Sunnah")
     st.divider()
 
-    # Render Chat History
     for message in st.session_state.history:
         role = message["role"]
         avatar_icon = "👤" if role == "user" else "🎓"
         with st.chat_message(role, avatar=avatar_icon):
             st.markdown(message["content"])
 
-    # Handle User Input
     prompt = st.chat_input("Ask about Islam, life, or share your feelings...")
 
     if prompt:
-        # Display User Message
+        # Developer Logging
+        print(f"📝 [User Question]: {prompt}")
+
         with st.chat_message("user", avatar="👤"):
             st.markdown(prompt)
         st.session_state.history.append({"role": "user", "content": prompt})
 
-        # Generate AI Response
         with st.chat_message("assistant", avatar="🎓"):
             message_placeholder = st.empty()
             message_placeholder.markdown("...") 
