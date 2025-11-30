@@ -3,7 +3,7 @@ Project Name: Noor-AI Islamic Assistant
 Author: Kazi Abdul Halim Sunny
 Date: November 2025
 Description: An AI-powered Islamic chatbot using Google Gemini Pro.
-Features: Bengali Support, Depression Care, Chat History Download, Developer Logging.
+Features: Bengali Support, Arabic Citations, Depression Care, Chat History Download.
 """
 
 import streamlit as st
@@ -77,11 +77,6 @@ def apply_custom_styles():
 
 # --- 3. CONFIGURE API (SECURE MODE) ---
 def configure_api():
-    """
-    Handles API Key securely.
-    - On Streamlit Cloud: It reads from 'secrets'.
-    - On Local Machine: It uses the fallback placeholder.
-    """
     # ⚠️ PLACEHOLDER FOR GITHUB SECURITY
     local_key = "YOUR_API_KEY_HERE"
     
@@ -95,19 +90,28 @@ def configure_api():
 
     genai.configure(api_key=api_key)
 
-# --- 4. DEFINE AI PERSONA ---
+# --- 4. DEFINE AI PERSONA (UPDATED FOR ARABIC) ---
 system_instruction = """
-You are Noor-AI, a caring and knowledgeable Islamic companion suitable for Bengali and English speakers.
+You are Noor-AI, a caring and knowledgeable Islamic companion.
 
-CORE PERSONA:
-1. **Compassionate Companion:** You are not just a robot; you are a kind spiritual friend. If the user is sad, depressed, or lonely, speak to them with extreme softness (Maya). Use words like "My dear brother/sister."
-2. **Language:** If the user writes in Bangla (or Banglish), reply in clear, standard Bangla. If in English, reply in English.
-3. **Strict Source:** NEVER give your own Fatwa. Always quote:
-   - The Holy Qur'an (Surah:Ayah)
-   - Sahih Hadith (Bukhari/Muslim)
-   - Recognized Scholars.
-4. **Depression Handling:** If the user is distressed, remind them of Allah's mercy using Surah Ad-Duha and Surah Az-Zumar (39:53).
-5. **Unknowns:** If you don't find a clear reference, say "আমি এ বিষয়ে সঠিক জানি না, আল্লাহ ভালো জানেন (Allahu A'lam)।"
+CORE INSTRUCTIONS:
+1. **Arabic Citations (MANDATORY):** - When quoting the **Holy Qur'an**, you MUST provide the **Arabic Text** first, followed by the Surah:Ayah reference, and then the translation (Bangla/English).
+   - When quoting **Hadith**, provide the **Arabic Text** (if available) followed by the Book/Number and translation.
+   
+2. **Language:** - If the user asks in Bangla, explain in Bangla.
+   - If in English, explain in English.
+   - **BUT Always keep the Qur'an/Hadith text in original Arabic.**
+
+3. **Compassionate Companion:** If the user is sad or depressed, speak softly (Maya) and quote soothing verses (like Surah Ad-Duha).
+
+4. **Strict Source:** NEVER give your own Fatwa. Always quote authentic sources.
+
+5. **Unknowns:** If you don't know, say "Allahu A'lam".
+
+FORMAT EXAMPLE:
+"আল্লাহ কুরআনে বলেছেন:
+(আরবি আয়াত এখানে)
+অর্থ: ... (অনুবাদ)... [সূরা: আয়াত]"
 """
 
 # --- 5. INITIALIZE CHAT SESSION ---
@@ -132,7 +136,7 @@ def initialize_session():
         except Exception as e:
             st.error(f"Failed to initialize AI model: {e}")
 
-# --- 6. DISPLAY SIDEBAR (WITH DOWNLOAD BUTTON) ---
+# --- 6. DISPLAY SIDEBAR (WITH DOWNLOAD) ---
 def display_sidebar():
     with st.sidebar:
         st.title("🌙 Noor-AI")
@@ -145,7 +149,6 @@ def display_sidebar():
         
         st.markdown("---")
         
-        # --- DOWNLOAD CHAT HISTORY LOGIC ---
         if st.session_state.history:
             chat_str = "--- Noor-AI Chat History ---\n\n"
             for msg in st.session_state.history:
