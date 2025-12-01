@@ -3,14 +3,12 @@ Project Name: Noor-AI Islamic Assistant
 Author: Kazi Abdul Halim Sunny
 Date: November 2025
 Description: An AI-powered Islamic chatbot using Google Gemini Pro.
-Features: Auto-Search eshodinshikhi.com, Strict Theological Safety, Dual Language Logic.
+Features: Auto-Search, Strict Theological Safety, Scholar Warning, Dual Language Logic.
 """
 
 import streamlit as st
 import google.generativeai as genai
-import requests
-from bs4 import BeautifulSoup
-from duckduckgo_search import DDGS  # New Search Tool
+from duckduckgo_search import DDGS
 
 # --- 1. SETUP PAGE CONFIGURATION ---
 def setup_page_config():
@@ -37,7 +35,7 @@ def apply_custom_styles():
 
 # --- 3. CONFIGURE API ---
 def configure_api():
-    local_key = "YOUR_API_KEY_HERE" # ⚠️ Keep Placeholder for GitHub
+    local_key = "YOUR_API_KEY_HERE" # ⚠️ Placeholder for GitHub
     try:
         if hasattr(st, "secrets") and "GOOGLE_API_KEY" in st.secrets:
             api_key = st.secrets["GOOGLE_API_KEY"]
@@ -47,15 +45,37 @@ def configure_api():
         api_key = local_key
     genai.configure(api_key=api_key)
 
-# --- 4. DEFINE AI PERSONA ---
+# --- 4. DEFINE AI PERSONA (CORRECTED DEVELOPER INFO) ---
 system_instruction = """
 You are Noor-AI, a caring and knowledgeable Islamic companion.
 
 *** IMPORTANT PROTOCOLS ***
-1. **THEOLOGICAL SAFETY:** ONLY Allah is the Creator. You were developed by **Kazi Abdul Halim Sunny**.
-2. **STRICT LANGUAGE:** Bangla Q -> Bangla Ans. English Q -> English Ans.
-3. **IDENTITY:** Developer: Kazi Abdul Halim Sunny (CSE Student, Writer of 'Pretend' - Free online book).
+
+1. **THEOLOGICAL SAFETY:** ONLY Allah is the Creator. Developer is **Kazi Abdul Halim Sunny**.
+
+2. **STRICT LANGUAGE:** Bangla Q -> Bangla Ans. English Q -> English Ans. Do NOT mix unless necessary.
+
+3. **IDENTITY & DEVELOPER INFO (STRICT):**
+   - **Who created you?** You were developed by **Kazi Abdul Halim Sunny**.
+
+   - **Level 1: Basic Introduction (Always say this first):**
+     If asked about the developer, reply with extreme humility:
+     "আমাকে তৈরি করেছেন **কাজী আব্দুল হালিম সানী**। তিনি নিজেকে আল্লাহর একজন নগণ্য গুনাহগার বান্দা এবং 'তালেবুল ইলম' (জ্ঞান অন্বেষণকারী) হিসেবে পরিচয় দিতেই ভালোবাসেন। 
+     তাঁর একমাত্র ইচ্ছে, মানুষ যেন দ্বীনের সঠিক জ্ঞান পেয়ে আলোকিত হয়। এই যাত্রায় সামান্য সহযোগিতা করতে পারলেই তিনি নিজেকে ধন্য মনে করবেন। তাঁর জন্য দোয়া করবেন।"
+
+   - **Level 2: Detailed Bio (ONLY if user asks for details/books):**
+     If user insists or asks "What does he do?", THEN say:
+     "দুনিয়াদারি পরিচয়ে তিনি **মেট্রোপলিটন ইউনিভার্সিটির** সফটওয়্যার ইঞ্জিনিয়ারিংয়ের (৪র্থ ব্যাচ) ছাত্র।
+     
+     তিনি একজন তরুণ বাংলাদেশি লেখক এবং ৪টি বই লিখেছেন:
+     ১. **'আজ কেন নয়?' (২০১৮):** ছোটদের জন্য আত্মোন্নয়নমূলক বই।
+     ২. **'একটুকরো স্বপ্ন' (২০২০):** কিশোরগল্পের বই।
+     ৩. **'অমানিশা' (২০২১):** রহস্য উপন্যাস।
+     ৪. **'প্রিটেন্ড' (২০২১):** তরুণদের সমস্যা নিয়ে লেখা উপন্যাস।
+        * **বিশেষ দ্রষ্টব্য:** লেখক এই বইটির (Pretend) **অনলাইন কপি সবার জন্য ফ্রী (Free)** করে দিয়েছেন যেন সবাই পড়ে উপকৃত হতে পারে। এটার কোনো অফলাইন ভার্সন নেই।"
+
 4. **ARABIC CITATIONS:** Always provide Arabic text for Quran first.
+
 5. **SOURCE:** No personal Fatwa. Quote Quran/Hadith.
 """
 
@@ -72,80 +92,34 @@ def initialize_session():
         except Exception as e:
             st.error(f"Failed to initialize AI model: {e}")
 
-# --- 6. SEARCH & SCRAPE FUNCTIONS (NEW MAGIC) ---
-def get_eshodinshikhi_info(query):
-    """Searches eshodinshikhi.com for the topic and returns content."""
+# --- 6. AUTO-SEARCH FUNCTION ---
+def search_eshodinshikhi_silent(query):
     try:
-        # 1. Search the site
         with DDGS() as ddgs:
-            # We search specifically inside the website
             results = list(ddgs.text(f"site:eshodinshikhi.com {query}", max_results=1))
         
-        if not results:
-            return None, "No specific article found on Esho Din Shikhi for this topic."
-            
-        # 2. Get the first link
-        first_result = results[0]
-        url = first_result['href']
-        title = first_result['title']
-        
-        # 3. Scrape the content
-        headers = {'User-Agent': 'Mozilla/5.0'}
-        response = requests.get(url, headers=headers)
-        soup = BeautifulSoup(response.text, 'html.parser')
-        
-        # Extract text (paragraphs)
-        paragraphs = soup.find_all('p')
-        content = "\n".join([p.get_text() for p in paragraphs])
-        
-        return url, f"**Source Title:** {title}\n**URL:** {url}\n\n**Content Preview:**\n{content[:4000]}"
-        
-    except Exception as e:
-        return None, f"Error searching website: {e}"
+        if results:
+            first_result = results[0]
+            return first_result['title'], first_result['href'], first_result['body']
+        return None, None, None
+    except:
+        return None, None, None
 
-# --- 7. SIDEBAR ---
+# --- 7. SIDEBAR (CLEANED UP & WARNING ADDED) ---
 def display_sidebar():
     with st.sidebar:
         st.title("🌙 Noor-AI")
+        # সাইডবারে শুধু নাম থাকবে, তালেবুল ইলম বাদ দেওয়া হয়েছে
         st.markdown("**Developer:** Kazi Abdul Halim Sunny")
+        
         st.info("Guidance based on Qur'an & Authentic Sunnah.")
         
+        # --- WARNING MESSAGE ---
+        st.warning("⚠️ For specific Fiqh rulings or complex issues, please consult a local Mufti/Scholar.")
+        # -----------------------
+        
         st.markdown("---")
         
-        # --- AUTO SEARCH FEATURE ---
-        st.markdown("### 🔍 Esho Din Shikhi Search")
-        st.caption("Search directly from the website database.")
-        
-        search_topic = st.text_input("Topic (e.g., Roza, Namaz):")
-        
-        if st.button("Search Website"):
-            if search_topic:
-                with st.spinner(f"Searching eshodinshikhi.com for '{search_topic}'..."):
-                    url, raw_text = get_eshodinshikhi_info(search_topic)
-                    
-                    if url:
-                        # Ask AI to summarize the finding
-                        summary_prompt = f"Summarize this Islamic ruling found from eshodinshikhi.com regarding '{search_topic}':\n\n{raw_text}"
-                        try:
-                            response = st.session_state.chat.send_message(summary_prompt)
-                            
-                            st.success("Result Found!")
-                            st.markdown(f"**🔗 Source:** [{url}]({url})")
-                            st.markdown("---")
-                            st.markdown(response.text)
-                            
-                            # Save to history
-                            st.session_state.history.append({"role": "assistant", "content": f"**[Esho Din Shikhi Source]:** {url}\n\n{response.text}"})
-                        except Exception as e:
-                            st.error(f"AI Error: {e}")
-                    else:
-                        st.warning("No direct article found on the website for this topic.")
-            else:
-                st.warning("Please type a topic first.")
-
-        st.markdown("---")
-        
-        # Download Button
         if st.session_state.history:
             chat_str = "--- Noor-AI Chat History ---\n\n"
             for msg in st.session_state.history:
@@ -153,7 +127,7 @@ def display_sidebar():
                 chat_str += f"{role}: {msg['content']}\n\n"
             st.download_button("📥 Download Chat", chat_str, "noor_ai_chat.txt")
 
-# --- 8. MAIN APP ---
+# --- 8. MAIN APP LOGIC ---
 def main():
     setup_page_config()
     apply_custom_styles()
@@ -171,7 +145,7 @@ def main():
         with st.chat_message(role, avatar=avatar_icon):
             st.markdown(message["content"])
 
-    prompt = st.chat_input("Ask about Islam, life, or share your feelings...")
+    prompt = st.chat_input("Ask about Islam (e.g., Namaz, Roza)...")
 
     if prompt:
         print(f"📝 [User Question]: {prompt}")
@@ -182,11 +156,29 @@ def main():
         with st.chat_message("assistant", avatar="🎓"):
             message_placeholder = st.empty()
             message_placeholder.markdown("...") 
+            
             try:
+                # 1. Get Normal AI Response
                 if hasattr(st.session_state, 'chat'):
                     response = st.session_state.chat.send_message(prompt)
-                    message_placeholder.markdown(response.text)
-                    st.session_state.history.append({"role": "assistant", "content": response.text})
+                    full_response = response.text
+                    
+                    # 2. AUTO-SEARCH Logic
+                    site_title, site_url, site_snippet = search_eshodinshikhi_silent(prompt)
+                    
+                    # 3. If found, append reference
+                    if site_url:
+                        full_response += "\n\n---\n"
+                        full_response += f"### 📖 Reference from Esho Din Shikhi\n"
+                        full_response += f"I found a relevant article on **eshodinshikhi.com**:\n"
+                        full_response += f"**Title:** {site_title}\n"
+                        full_response += f"**Link:** [{site_url}]({site_url})\n"
+                        full_response += f"> *{site_snippet}*"
+                    
+                    # 4. Display Final Result
+                    message_placeholder.markdown(full_response)
+                    st.session_state.history.append({"role": "assistant", "content": full_response})
+                    
             except Exception as e:
                 message_placeholder.error(f"Error: {e}")
 
