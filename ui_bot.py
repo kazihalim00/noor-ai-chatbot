@@ -3,12 +3,12 @@ Project Name: Noor-AI Islamic Assistant
 Author: Kazi Abdul Halim Sunny
 Date: November 2025
 Description: An AI-powered Islamic chatbot using Google Gemini Pro.
-Features: Auto-Search, Strict Theological Safety, Scholar Warning, Dual Language Logic.
+Features: Strict Theological Safety, Strict Language Matching, Author Bio, Chat History Download.
 """
 
 import streamlit as st
 import google.generativeai as genai
-from duckduckgo_search import DDGS
+from google.generativeai.types import HarmCategory, HarmBlockThreshold
 
 # --- 1. SETUP PAGE CONFIGURATION ---
 def setup_page_config():
@@ -22,20 +22,65 @@ def setup_page_config():
 def apply_custom_styles():
     st.markdown("""
         <style>
-        .stApp { background-color: #1E1E1E; color: #FFFFFF; }
-        h1 { color: #E0E0E0 !important; font-family: 'Helvetica Neue', sans-serif; text-align: center; font-weight: 300; }
-        .stMarkdown h3 { color: #B08D55 !important; text-align: center; }
-        [data-testid="stSidebar"] { background-color: #111111; border-right: 1px solid #333; }
-        .stTextInput input { background-color: #2D2D2D !important; color: white !important; border: 1px solid #444; border-radius: 20px; }
-        .stChatMessage { padding: 10px; border-radius: 10px; margin-bottom: 10px; }
-        div[data-testid="stChatMessage"]:nth-child(odd) { background-color: #2D2D2D; border: 1px solid #3E3E3E; color: #E0E0E0; }
-        div[data-testid="stChatMessage"]:nth-child(even) { background-color: #1a2f23; border: 1px solid #204533; color: #d1fae5; }
+        /* General App Styling */
+        .stApp {
+            background-color: #1E1E1E;
+            color: #FFFFFF;
+        }
+        
+        /* Headers */
+        h1 {
+            color: #E0E0E0 !important;
+            font-family: 'Helvetica Neue', sans-serif;
+            text-align: center;
+            font-weight: 300;
+        }
+        .stMarkdown h3 {
+            color: #B08D55 !important; /* Muted Gold */
+            text-align: center;
+        }
+        
+        /* Sidebar Styling */
+        [data-testid="stSidebar"] {
+            background-color: #111111;
+            border-right: 1px solid #333;
+        }
+        
+        /* Input Box Styling */
+        .stTextInput input {
+            background-color: #2D2D2D !important;
+            color: white !important;
+            border: 1px solid #444;
+            border-radius: 20px;
+        }
+        
+        /* Chat Bubble Styling */
+        .stChatMessage {
+            padding: 10px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+        /* User Message (Dark Grey) */
+        div[data-testid="stChatMessage"]:nth-child(odd) {
+            background-color: #2D2D2D; 
+            border: 1px solid #3E3E3E;
+            color: #E0E0E0;
+        }
+        /* AI Message (Dark Emerald) */
+        div[data-testid="stChatMessage"]:nth-child(even) {
+            background-color: #1a2f23; 
+            border: 1px solid #204533;
+            color: #d1fae5; 
+        }
         </style>
     """, unsafe_allow_html=True)
 
-# --- 3. CONFIGURE API ---
+# --- 3. CONFIGURE API (SECURE MODE) ---
 def configure_api():
-    local_key = "YOUR_API_KEY_HERE" # ⚠️ Placeholder for GitHub
+    # ⚠️ LOCAL TESTING: Use Real Key
+    # ⚠️ GITHUB: Use "YOUR_API_KEY_HERE"
+    local_key = "YOUR_API_KEY_HERE" 
+    
     try:
         if hasattr(st, "secrets") and "GOOGLE_API_KEY" in st.secrets:
             api_key = st.secrets["GOOGLE_API_KEY"]
@@ -43,80 +88,83 @@ def configure_api():
             raise FileNotFoundError 
     except:
         api_key = local_key
+
     genai.configure(api_key=api_key)
 
-# --- 4. DEFINE AI PERSONA (CORRECTED DEVELOPER INFO) ---
+# --- 4. DEFINE AI PERSONA (ALL STRICT RULES) ---
 system_instruction = """
 You are Noor-AI, a caring and knowledgeable Islamic companion.
 
 *** IMPORTANT PROTOCOLS ***
 
-1. **THEOLOGICAL SAFETY:** ONLY Allah is the Creator. Developer is **Kazi Abdul Halim Sunny**.
+1. **THEOLOGICAL SAFETY (AQEEDAH):**
+   - **Creator:** ONLY Allah is the Creator (Sristikorta/Srosta). NEVER attribute this title to a human.
+   - **Developer:** If asked who made/developed you, reply: "I was developed/programmed by **Kazi Abdul Halim Sunny**." (আমাকে ডেভেলপ করেছেন কাজী আব্দুল হালিম সানী).
+   - NEVER say "My Creator is Sunny". Say "My Developer is Sunny".
 
-2. **STRICT LANGUAGE:** Bangla Q -> Bangla Ans. English Q -> English Ans. Do NOT mix unless necessary.
+2. **STRICT LANGUAGE MATCHING:**
+   - Detect the language of the User's prompt.
+   - **If User asks in English** -> You MUST reply in **ENGLISH ONLY**.
+   - **If User asks in Bangla** -> You MUST reply in **BANGLA ONLY**.
+   - Do not mix languages unless explaining an Arabic term.
 
-3. **IDENTITY & DEVELOPER INFO (STRICT):**
-   - **Who created you?** You were developed by **Kazi Abdul Halim Sunny**.
+3. **IDENTITY & BIO:**
+   - **Developer:** Kazi Abdul Halim Sunny.
+   
+   - **Level 1: Basic Introduction (Humility):**
+     If asked about the developer, reply:
+     "আমাকে তৈরি করেছেন **কাজী আব্দুল হালিম সানী**। তিনি নিজেকে আল্লাহর একজন নগণ্য গুনাহগার বান্দা এবং 'তালেবুল ইলম' (জ্ঞান অন্বেষণকারী) হিসেবে পরিচয় দিতেই ভালোবাসেন। তাঁর একমাত্র ইচ্ছে, মানুষ যেন দ্বীনের সঠিক জ্ঞান পেয়ে আলোকিত হয়। তাঁর জন্য দোয়া করবেন।"
 
-   - **Level 1: Basic Introduction (Always say this first):**
-     If asked about the developer, reply with extreme humility:
-     "আমাকে তৈরি করেছেন **কাজী আব্দুল হালিম সানী**। তিনি নিজেকে আল্লাহর একজন নগণ্য গুনাহগার বান্দা এবং 'তালেবুল ইলম' (জ্ঞান অন্বেষণকারী) হিসেবে পরিচয় দিতেই ভালোবাসেন। 
-     তাঁর একমাত্র ইচ্ছে, মানুষ যেন দ্বীনের সঠিক জ্ঞান পেয়ে আলোকিত হয়। এই যাত্রায় সামান্য সহযোগিতা করতে পারলেই তিনি নিজেকে ধন্য মনে করবেন। তাঁর জন্য দোয়া করবেন।"
-
-   - **Level 2: Detailed Bio (ONLY if user asks for details/books):**
-     If user insists or asks "What does he do?", THEN say:
+   - **Level 2: Detailed Bio (Only if asked for details/profession):**
      "দুনিয়াদারি পরিচয়ে তিনি **মেট্রোপলিটন ইউনিভার্সিটির** সফটওয়্যার ইঞ্জিনিয়ারিংয়ের (৪র্থ ব্যাচ) ছাত্র।
      
      তিনি একজন তরুণ বাংলাদেশি লেখক এবং ৪টি বই লিখেছেন:
-     ১. **'আজ কেন নয়?' (২০১৮):** ছোটদের জন্য আত্মোন্নয়নমূলক বই।
-     ২. **'একটুকরো স্বপ্ন' (২০২০):** কিশোরগল্পের বই।
-     ৩. **'অমানিশা' (২০২১):** রহস্য উপন্যাস।
+     ১. **'আজ কেন নয়?' (২০১৮)**
+     ২. **'একটুকরো স্বপ্ন' (২০২০)**
+     ৩. **'অমানিশা' (২০২১)**
      ৪. **'প্রিটেন্ড' (২০২১):** তরুণদের সমস্যা নিয়ে লেখা উপন্যাস।
         * **বিশেষ দ্রষ্টব্য:** লেখক এই বইটির (Pretend) **অনলাইন কপি সবার জন্য ফ্রী (Free)** করে দিয়েছেন যেন সবাই পড়ে উপকৃত হতে পারে। এটার কোনো অফলাইন ভার্সন নেই।"
 
-4. **ARABIC CITATIONS:** Always provide Arabic text for Quran first.
+4. **ARABIC CITATIONS:** - When quoting the Holy Qur'an, you MUST provide the **Arabic Text** first, then the translation.
 
-5. **SOURCE:** No personal Fatwa. Quote Quran/Hadith.
+5. **SOURCE TRUTH:**
+   - NEVER give your own Fatwa. Always quote Quran & Sahih Hadith.
+   - If unknown, say "Allahu A'lam".
 """
 
-# --- 5. INITIALIZE SESSION ---
+# --- 5. INITIALIZE CHAT SESSION ---
 def initialize_session():
     if "history" not in st.session_state:
         st.session_state.history = []
+        
+        safety_settings = {
+            HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_NONE,
+            HarmCategory.HARM_CATEGORY_HATE_SPEECH: HarmBlockThreshold.BLOCK_NONE,
+            HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: HarmBlockThreshold.BLOCK_NONE,
+            HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_NONE,
+        }
+
         try:
             st.session_state.model = genai.GenerativeModel(
                 model_name="gemini-flash-latest", 
-                system_instruction=system_instruction
+                system_instruction=system_instruction,
+                safety_settings=safety_settings
             )
             st.session_state.chat = st.session_state.model.start_chat(history=[])
         except Exception as e:
             st.error(f"Failed to initialize AI model: {e}")
 
-# --- 6. AUTO-SEARCH FUNCTION ---
-def search_eshodinshikhi_silent(query):
-    try:
-        with DDGS() as ddgs:
-            results = list(ddgs.text(f"site:eshodinshikhi.com {query}", max_results=1))
-        
-        if results:
-            first_result = results[0]
-            return first_result['title'], first_result['href'], first_result['body']
-        return None, None, None
-    except:
-        return None, None, None
-
-# --- 7. SIDEBAR (CLEANED UP & WARNING ADDED) ---
+# --- 6. DISPLAY SIDEBAR ---
 def display_sidebar():
     with st.sidebar:
         st.title("🌙 Noor-AI")
-        # সাইডবারে শুধু নাম থাকবে, তালেবুল ইলম বাদ দেওয়া হয়েছে
-        st.markdown("**Developer:** Kazi Abdul Halim Sunny")
+        st.markdown("---")
+        st.markdown("**Developer:**")
+        st.markdown("### Kazi Abdul Halim Sunny")
         
+        st.markdown("---")
         st.info("Guidance based on Qur'an & Authentic Sunnah.")
-        
-        # --- WARNING MESSAGE ---
-        st.warning("⚠️ For specific Fiqh rulings or complex issues, please consult a local Mufti/Scholar.")
-        # -----------------------
+        st.warning("For specific Fiqh rulings, please consult a local Scholar.")
         
         st.markdown("---")
         
@@ -125,9 +173,15 @@ def display_sidebar():
             for msg in st.session_state.history:
                 role = "User" if msg["role"] == "user" else "Noor-AI"
                 chat_str += f"{role}: {msg['content']}\n\n"
-            st.download_button("📥 Download Chat", chat_str, "noor_ai_chat.txt")
+            
+            st.download_button(
+                label="📥 Download Chat",
+                data=chat_str,
+                file_name="noor_ai_chat.txt",
+                mime="text/plain"
+            )
 
-# --- 8. MAIN APP LOGIC ---
+# --- 7. MAIN APP FUNCTION ---
 def main():
     setup_page_config()
     apply_custom_styles()
@@ -145,10 +199,12 @@ def main():
         with st.chat_message(role, avatar=avatar_icon):
             st.markdown(message["content"])
 
-    prompt = st.chat_input("Ask about Islam (e.g., Namaz, Roza)...")
+    prompt = st.chat_input("Ask a question about Islam, life, or share your feelings...")
 
     if prompt:
+        # Developer Logging
         print(f"📝 [User Question]: {prompt}")
+
         with st.chat_message("user", avatar="👤"):
             st.markdown(prompt)
         st.session_state.history.append({"role": "user", "content": prompt})
@@ -158,29 +214,12 @@ def main():
             message_placeholder.markdown("...") 
             
             try:
-                # 1. Get Normal AI Response
                 if hasattr(st.session_state, 'chat'):
                     response = st.session_state.chat.send_message(prompt)
-                    full_response = response.text
-                    
-                    # 2. AUTO-SEARCH Logic
-                    site_title, site_url, site_snippet = search_eshodinshikhi_silent(prompt)
-                    
-                    # 3. If found, append reference
-                    if site_url:
-                        full_response += "\n\n---\n"
-                        full_response += f"### 📖 Reference from Esho Din Shikhi\n"
-                        full_response += f"I found a relevant article on **eshodinshikhi.com**:\n"
-                        full_response += f"**Title:** {site_title}\n"
-                        full_response += f"**Link:** [{site_url}]({site_url})\n"
-                        full_response += f"> *{site_snippet}*"
-                    
-                    # 4. Display Final Result
-                    message_placeholder.markdown(full_response)
-                    st.session_state.history.append({"role": "assistant", "content": full_response})
-                    
+                    message_placeholder.markdown(response.text)
+                    st.session_state.history.append({"role": "assistant", "content": response.text})
             except Exception as e:
-                message_placeholder.error(f"Error: {e}")
+                message_placeholder.error(f"An error occurred: {e}")
 
 if __name__ == "__main__":
     main()
