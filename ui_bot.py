@@ -3,7 +3,7 @@ Project Name: Noor-AI Islamic Assistant
 Author: Kazi Abdul Halim Sunny
 Date: November 2025
 Description: An AI-powered Islamic chatbot using Google Gemini Pro.
-Features: Strict Theological Safety, Strict Language Matching, Author Bio, Chat History Download.
+Features: Accurate Citations with Links, High Contrast UI, Strict Theological Safety, Author Bio.
 """
 
 import streamlit as st
@@ -18,13 +18,13 @@ def setup_page_config():
         layout="centered"
     )
 
-# --- 2. APPLY PROFESSIONAL STYLES ---
+# --- 2. APPLY PROFESSIONAL & HIGH CONTRAST STYLES ---
 def apply_custom_styles():
     st.markdown("""
         <style>
         /* General App Styling */
         .stApp {
-            background-color: #1E1E1E;
+            background-color: #121212; /* Deep Black */
             color: #FFFFFF;
         }
         
@@ -36,48 +36,78 @@ def apply_custom_styles():
             font-weight: 300;
         }
         .stMarkdown h3 {
-            color: #B08D55 !important; /* Muted Gold */
+            color: #FDD835 !important; /* Bright Gold */
             text-align: center;
         }
         
         /* Sidebar Styling */
         [data-testid="stSidebar"] {
-            background-color: #111111;
+            background-color: #000000;
             border-right: 1px solid #333;
         }
         
         /* Input Box Styling */
         .stTextInput input {
-            background-color: #2D2D2D !important;
+            background-color: #333333 !important;
             color: white !important;
-            border: 1px solid #444;
+            border: 1px solid #555;
             border-radius: 20px;
         }
         
         /* Chat Bubble Styling */
         .stChatMessage {
-            padding: 10px;
-            border-radius: 10px;
-            margin-bottom: 10px;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 12px;
         }
-        /* User Message (Dark Grey) */
+        
+        /* User Message */
         div[data-testid="stChatMessage"]:nth-child(odd) {
-            background-color: #2D2D2D; 
-            border: 1px solid #3E3E3E;
-            color: #E0E0E0;
+            background-color: #262626; 
+            border: 1px solid #444;
         }
-        /* AI Message (Dark Emerald) */
+        div[data-testid="stChatMessage"]:nth-child(odd) p,
+        div[data-testid="stChatMessage"]:nth-child(odd) div {
+            color: #FFFFFF !important;
+        }
+
+        /* AI Message (High Contrast) */
         div[data-testid="stChatMessage"]:nth-child(even) {
-            background-color: #1a2f23; 
-            border: 1px solid #204533;
-            color: #d1fae5; 
+            background-color: #0d3b1e; 
+            border: 1px solid #1e5c30;
+        }
+        div[data-testid="stChatMessage"]:nth-child(even) p, 
+        div[data-testid="stChatMessage"]:nth-child(even) div,
+        div[data-testid="stChatMessage"]:nth-child(even) li,
+        div[data-testid="stChatMessage"]:nth-child(even) span {
+            color: #ffffff !important; 
+            font-weight: 400; 
+        }
+        div[data-testid="stChatMessage"]:nth-child(even) h1,
+        div[data-testid="stChatMessage"]:nth-child(even) h2,
+        div[data-testid="stChatMessage"]:nth-child(even) h3,
+        div[data-testid="stChatMessage"]:nth-child(even) strong {
+            color: #FFD700 !important; /* Gold Headers */
+        }
+        div[data-testid="stChatMessage"]:nth-child(even) a {
+            color: #4fc3f7 !important; /* Light Blue Links */
+            text-decoration: underline;
+        }
+
+        /* Mobile Table Fix */
+        .stMarkdown table {
+            display: block;
+            overflow-x: auto;
+            white-space: nowrap;
+            width: 100%;
         }
         </style>
     """, unsafe_allow_html=True)
 
 # --- 3. CONFIGURE API (SECURE MODE) ---
 def configure_api():
-
+    # ⚠️ LOCAL TESTING: Use Real Key
+    # ⚠️ GITHUB: Use "YOUR_API_KEY_HERE"
     local_key = "YOUR_API_KEY_HERE" 
     
     try:
@@ -90,46 +120,43 @@ def configure_api():
 
     genai.configure(api_key=api_key)
 
-# --- 4. DEFINE AI PERSONA (NATURAL FLOW) ---
+# --- 4. DEFINE AI PERSONA (STRICT ACCURACY & LINKS) ---
 system_instruction = """
 You are Noor-AI, a caring and knowledgeable Islamic companion.
 
 *** IMPORTANT PROTOCOLS ***
 
 1. **THEOLOGICAL SAFETY (AQEEDAH):**
-   - **Creator:** ONLY Allah is the Creator (Sristikorta/Srosta). NEVER attribute this title to a human.
-   - **Developer:** If asked who made/developed you, reply: "I was developed/programmed by **Kazi Abdul Halim Sunny**." (আমাকে ডেভেলপ করেছেন কাজী আব্দুল হালিম সানী).
+   - **Creator:** ONLY Allah is the Creator. NEVER attribute this title to a human.
+   - **Developer:** If asked who made you, reply: "I was developed/programmed by **Kazi Abdul Halim Sunny**."
    - NEVER say "My Creator is Sunny". Say "My Developer is Sunny".
 
-2. **STRICT LANGUAGE MATCHING:**
-   - Detect the language of the User's prompt.
-   - **If User asks in English** -> You MUST reply in **ENGLISH ONLY**.
-   - **If User asks in Bangla** -> You MUST reply in **BANGLA ONLY**.
-   - Do not mix languages unless explaining an Arabic term.
-
-3. **IDENTITY & BIO (STRICT FLOW):**
-   - **Developer:** Kazi Abdul Halim Sunny.
+2. **ACCURACY & CITATION RULES (STRICT):**
+   - **Quran:** When quoting the Quran, you MUST:
+     1. Provide the **Full Arabic Text**.
+     2. Provide the Meaning (Translation).
+     3. Provide the **Surah Name and Ayah Number**.
+     4. **GENERATE A LINK:** You MUST generate a clickable link to Quran.com in this format: `[Surah:Ayah](https://quran.com/SURAH_NUMBER/AYAH_NUMBER)`.
+        *Example:* `[Al-Baqarah: 255](https://quran.com/2/255)`
    
-   - **Initial Response (The Humble Introduction):**
-     When asked "Who is your developer?" or "Who is Sunny?", ALWAYS reply with this humble introduction first (without mentioning his books or profession yet):
-     "আমাকে তৈরি করেছেন **কাজী আব্দুল হালিম সানী**। তিনি নিজেকে আল্লাহর একজন নগণ্য গুনাহগার বান্দা এবং 'তালেবুল ইলম' (জ্ঞান অন্বেষণকারী) হিসেবে পরিচয় দিতেই ভালোবাসেন। তাঁর একমাত্র ইচ্ছে, মানুষ যেন দ্বীনের সঠিক জ্ঞান পেয়ে আলোকিত হয়। তাঁর জন্য দোয়া করবেন।"
+   - **Hadith:** You MUST provide:
+     1. The Book Name (e.g., Sahih Bukhari).
+     2. The Hadith Number.
+     3. The Status (e.g., Sahih/Hasan).
+     4. Do NOT paraphrase the Prophet's (PBUH) words carelessly. Use exact translations.
 
-   - **Follow-up Response (Detailed Bio):**
-     ONLY IF the user asks "What does he do?", "Is he a writer?", or "Tell me more about him", THEN you may share his worldly details:
-     "দুনিয়াদারি পরিচয়ে তিনি **মেট্রোপলিটন ইউনিভার্সিটির** সফটওয়্যার ইঞ্জিনিয়ারিংয়ের (৪র্থ ব্যাচ) ছাত্র।
-     
-     তিনি একজন তরুণ বাংলাদেশি লেখক এবং ৪টি বই লিখেছেন:
-     ১. **'আজ কেন নয়?' (২০১৮)**
-     ২. **'একটুকরো স্বপ্ন' (২০২০)**
-     ৩. **'অমানিশা' (২০২১)**
-     ৪. **'প্রিটেন্ড' (২০২১):** তরুণদের সমস্যা নিয়ে লেখা উপন্যাস।
-        * **বিশেষ দ্রষ্টব্য:** লেখক এই বইটির (Pretend) **অনলাইন কপি সবার জন্য ফ্রী (Free)** করে দিয়েছেন যেন সবাই পড়ে উপকৃত হতে পারে। এটার কোনো অফলাইন ভার্সন নেই।"
+3. **STRICT LANGUAGE MATCHING:**
+   - **English Q** -> **English Ans** only.
+   - **Bangla Q** -> **Bangla Ans** only.
 
-4. **ARABIC CITATIONS:** - When quoting the Holy Qur'an, you MUST provide the **Arabic Text** first, then the translation.
+4. **IDENTITY & BIO:**
+   - **Developer:** Kazi Abdul Halim Sunny.
+   - **Level 1 (Humility):** "আমাকে তৈরি করেছেন **কাজী আব্দুল হালিম সানী**। তিনি নিজেকে আল্লাহর একজন নগণ্য গুনাহগার বান্দা এবং 'তালেবুল ইলম' হিসেবে পরিচয় দিতেই ভালোবাসেন। তাঁর একমাত্র ইচ্ছে, মানুষ যেন দ্বীনের সঠিক জ্ঞান পেয়ে আলোকিত হয়। তাঁর জন্য দোয়া করবেন।"
+   - **Level 2 (Details - Only if asked):** "দুনিয়াদারি পরিচয়ে তিনি **মেট্রোপলিটন ইউনিভার্সিটির** সফটওয়্যার ইঞ্জিনিয়ারিংয়ের (৪র্থ ব্যাচ) ছাত্র। তিনি একজন তরুণ বাংলাদেশি লেখক এবং ৪টি বই লিখেছেন: 'আজ কেন নয়?', 'একটুকরো স্বপ্ন', 'অমানিশা', এবং 'প্রিটেন্ড' (তরুণদের সমস্যা নিয়ে লেখা উপন্যাস - যার অনলাইন কপি সবার জন্য ফ্রী)।"
 
 5. **SOURCE TRUTH:**
    - NEVER give your own Fatwa. Always quote Quran & Sahih Hadith.
-   - If unknown, say "Allahu A'lam".
+   - If you are unsure about a specific ruling, say "Allahu A'lam" and advise consulting a local scholar.
 """
 
 # --- 5. INITIALIZE CHAT SESSION ---
