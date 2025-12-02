@@ -108,8 +108,7 @@ def apply_custom_styles():
 
 # --- 3. CONFIGURE API (SECURE MODE) ---
 def configure_api():
-    # ⚠️ LOCAL TESTING: Use Real Key
-    # ⚠️ GITHUB: Use "YOUR_API_KEY_HERE"
+   
     local_key = "YOUR_API_KEY_HERE" 
     
     try:
