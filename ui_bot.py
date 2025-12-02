@@ -3,7 +3,7 @@ Project Name: Noor-AI Islamic Assistant
 Author: Kazi Abdul Halim Sunny
 Date: November 2025
 Description: An AI-powered Islamic chatbot using Google Gemini Pro.
-Features: Accurate Citations with Links, High Contrast UI, Strict Theological Safety, Author Bio.
+Features: Fixed Clickable Links, Accurate Citations, Strict Theological Safety, Author Bio.
 """
 
 import streamlit as st
@@ -71,7 +71,7 @@ def apply_custom_styles():
             color: #FFFFFF !important;
         }
 
-        /* AI Message (High Contrast) */
+        /* AI Message */
         div[data-testid="stChatMessage"]:nth-child(even) {
             background-color: #0d3b1e; 
             border: 1px solid #1e5c30;
@@ -89,9 +89,11 @@ def apply_custom_styles():
         div[data-testid="stChatMessage"]:nth-child(even) strong {
             color: #FFD700 !important; /* Gold Headers */
         }
+        /* LINK STYLING (Blue & Underlined) */
         div[data-testid="stChatMessage"]:nth-child(even) a {
-            color: #4fc3f7 !important; /* Light Blue Links */
-            text-decoration: underline;
+            color: #4fc3f7 !important; 
+            text-decoration: underline !important;
+            font-weight: bold;
         }
 
         /* Mobile Table Fix */
@@ -120,7 +122,7 @@ def configure_api():
 
     genai.configure(api_key=api_key)
 
-# --- 4. DEFINE AI PERSONA (STRICT ACCURACY & LINKS) ---
+# --- 4. DEFINE AI PERSONA (STRICT LINKS ADDED) ---
 system_instruction = """
 You are Noor-AI, a caring and knowledgeable Islamic companion.
 
@@ -131,19 +133,16 @@ You are Noor-AI, a caring and knowledgeable Islamic companion.
    - **Developer:** If asked who made you, reply: "I was developed/programmed by **Kazi Abdul Halim Sunny**."
    - NEVER say "My Creator is Sunny". Say "My Developer is Sunny".
 
-2. **ACCURACY & CITATION RULES (STRICT):**
-   - **Quran:** When quoting the Quran, you MUST:
-     1. Provide the **Full Arabic Text**.
-     2. Provide the Meaning (Translation).
-     3. Provide the **Surah Name and Ayah Number**.
-     4. **GENERATE A LINK:** You MUST generate a clickable link to Quran.com in this format: `[Surah:Ayah](https://quran.com/SURAH_NUMBER/AYAH_NUMBER)`.
-        *Example:* `[Al-Baqarah: 255](https://quran.com/2/255)`
+2. **ACCURACY & CLICKABLE LINKS (MANDATORY):**
+   - **Quran:** When quoting the Quran, you MUST follow this EXACT format:
+     1. Arabic Text.
+     2. Meaning (Translation).
+     3. **THE LINK:** Use strict Markdown for the reference.
+        - ❌ Wrong: Surah Baqarah (2:255)
+        - ✅ Right: **[Surah Al-Baqarah: 255](https://quran.com/2/255)**
+        - **Formula:** `[Surah Name: Ayah](https://quran.com/SURAH_NUMBER/AYAH_NUMBER)`
    
-   - **Hadith:** You MUST provide:
-     1. The Book Name (e.g., Sahih Bukhari).
-     2. The Hadith Number.
-     3. The Status (e.g., Sahih/Hasan).
-     4. Do NOT paraphrase the Prophet's (PBUH) words carelessly. Use exact translations.
+   - **Hadith:** Provide Book Name, Hadith Number, and Status.
 
 3. **STRICT LANGUAGE MATCHING:**
    - **English Q** -> **English Ans** only.
@@ -156,7 +155,7 @@ You are Noor-AI, a caring and knowledgeable Islamic companion.
 
 5. **SOURCE TRUTH:**
    - NEVER give your own Fatwa. Always quote Quran & Sahih Hadith.
-   - If you are unsure about a specific ruling, say "Allahu A'lam" and advise consulting a local scholar.
+   - If you are unsure about a specific ruling, say "Allahu A'lam".
 """
 
 # --- 5. INITIALIZE CHAT SESSION ---
