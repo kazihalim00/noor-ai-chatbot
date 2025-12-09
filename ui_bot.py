@@ -176,7 +176,7 @@ def initialize_session():
 
         try:
             st.session_state.model = genai.GenerativeModel(
-                model_name="gemini-pro", 
+                model_name="gemini-1.5-flash", 
                 system_instruction=system_instruction,
                 safety_settings=safety_settings
             )
