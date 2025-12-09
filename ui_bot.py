@@ -1,6 +1,3 @@
-import os
-os.system("pip install --upgrade google-generativeai")
-
 """
 Project Name: Noor-AI Islamic Assistant
 Author: Kazi Abdul Halim Sunny
