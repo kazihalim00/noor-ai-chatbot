@@ -2,7 +2,7 @@
 Project Name: Noor-AI Islamic Assistant
 Author: Kazi Abdul Halim Sunny
 Date: December 2025
-Description: PROFESSIONAL CLOUD VERSION - Clear Fonts, Blue/Silver UI.
+Description: PROFESSIONAL CLOUD VERSION - Minimalist Dark, Clean Fonts, Zero Visual Noise.
 """
 
 import streamlit as st
@@ -19,90 +19,87 @@ def setup_page_config():
         layout="centered"
     )
 
-# --- 2. CSS: CLEAR FONT & DECENT BLUE THEME ---
+# --- 2. CSS: MINIMALIST & CLEAN (NO HEAVY COLORS) ---
 def apply_custom_styles():
     st.markdown("""
         <style>
-        /* Import clean font for straight numbers */
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap');
+        /* Import clean font for straight numbers & clear text */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
 
-        /* General App Background - Dark Slate Blue (Night Mode friendly) */
-        .stApp { background-color: #0F172A; color: #E2E8F0; }
+        /* General App Background - Dark but Neutral */
+        .stApp { background-color: #0E1117; color: #E6E6E6; }
         
-        /* Headers - Silver & Light Blue */
+        /* Headers - Clean & Simple */
         h1 { 
-            color: #E2E8F0 !important; /* Soft Silver */
+            color: #E6E6E6 !important; 
             font-family: 'Inter', sans-serif; 
             text-align: center; 
-            font-weight: 600; 
-            letter-spacing: 0.5px; 
-            border-bottom: 1px solid #334155;
+            font-weight: 500; 
+            letter-spacing: 0.5px;
             padding-bottom: 10px;
         }
         .stMarkdown h3 { 
-            color: #94A3B8 !important; /* Muted Blue-Grey */
+            color: #A1A1AA !important; /* Neutral Grey */
             text-align: center; 
-            font-weight: 500; 
+            font-weight: 400; 
         }
         
-        /* Sidebar Styling */
-        [data-testid="stSidebar"] { background-color: #020617; border-right: 1px solid #1E293B; }
+        /* Sidebar Styling - Minimalist Black */
+        [data-testid="stSidebar"] { background-color: #000000; border-right: 1px solid #27272A; }
         
         /* Input Field Styling */
         .stTextInput input { 
-            background-color: #1E293B !important; 
-            color: #F8FAFC !important; 
-            border: 1px solid #334155; 
-            border-radius: 20px; 
+            background-color: #18181B !important; /* Zinc-900 */
+            color: #FAFAFA !important; 
+            border: 1px solid #3F3F46; 
+            border-radius: 15px; 
             padding-left: 15px; 
             font-family: 'Inter', sans-serif;
         }
         
         /* --- CHAT INTERFACE STYLING --- */
         
-        /* User Message (Odd) - Dark Grey */
+        /* User Message (Odd) - Transparent/Minimal */
         div[data-testid="stChatMessage"]:nth-of-type(odd) {
-            background-color: #1E293B !important;
-            border: 1px solid #334155 !important;
-            border-radius: 12px;
+            background-color: transparent !important;
+            border: 1px solid #27272A !important;
+            border-radius: 10px;
             padding: 15px;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
             font-family: 'Inter', sans-serif;
         }
 
-        /* AI Message (Even) - DECENT BLUE THEME */
+        /* AI Message (Even) - SUBTLE GREY BOX (NO HEAVY COLORS) */
         div[data-testid="stChatMessage"]:nth-of-type(even) {
-            background-color: #172554 !important; /* Deep Royal Blue (Not Green) */
-            border: 1px solid #1E3A8A !important; /* Dark Blue Border */
-            border-left: 4px solid #60A5FA !important; /* Soft Sky Blue Accent (Not Gold) */
-            border-radius: 8px 12px 12px 8px;
-            padding: 15px;
-            margin-bottom: 12px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            background-color: #1C1C1E !important; /* Very Light Charcoal - Easy on eyes */
+            border: 1px solid #2C2C2E !important; /* Subtle border */
+            border-left: 3px solid #D4AF37 !important; /* Thin Elegant Gold Accent Line */
+            border-radius: 6px 10px 10px 6px;
+            padding: 20px;
+            margin-bottom: 15px;
         }
         
-        /* Text Visibility inside AI Bubble - Clear & Straight */
+        /* Text Visibility inside AI Bubble - High Clarity */
         div[data-testid="stChatMessage"]:nth-of-type(even) p,
         div[data-testid="stChatMessage"]:nth-of-type(even) div,
         div[data-testid="stChatMessage"]:nth-of-type(even) li {
-             color: #F1F5F9 !important; /* Very Light Blue-White */
-             line-height: 1.7;
-             font-family: 'Inter', sans-serif !important; /* STRAIGHT FONT (No crooked numbers) */
+             color: #E6E6E6 !important; /* Off-White for readability */
+             line-height: 1.8; /* Good spacing */
+             font-family: 'Inter', sans-serif !important; /* Straight, Modern Font */
              font-size: 16px;
         }
 
-        /* Key Terms - Sky Blue instead of Gold */
+        /* Key Terms - Gold text only here */
         div[data-testid="stChatMessage"]:nth-of-type(even) strong { 
-            color: #93C5FD !important; /* Light Blue Highlight */
-            font-weight: 700 !important; 
+            color: #FCD34D !important; /* Soft Gold for important words */
+            font-weight: 600 !important; 
         }
 
-        /* Hyperlinks - Cyan */
+        /* Hyperlinks - Subtle Blue */
         div[data-testid="stChatMessage"]:nth-of-type(even) a { 
-            color: #22D3EE !important; /* Cyan/Teal */
+            color: #60A5FA !important; /* Soft Blue */
             text-decoration: none !important; 
-            border-bottom: 1px dotted #22D3EE;
-            font-weight: 500; 
+            border-bottom: 1px dotted #60A5FA;
         }
         
         /* Mobile Responsiveness */
@@ -184,7 +181,7 @@ You are Noor-AI, a sophisticated and caring Islamic companion dedicated to provi
 
 6. **SCHOLARLY REFERENCE PRIORITY:**
    - Prioritize insights from **Ustaz Abu Sa'ada Muhammad Hammad Billaah** & **Esho Din Shikhi**.
-   - **Visual Emphasis:** Use **Bold** formatting for significant Islamic terminology (e.g., **Tawhid**, **Taqwa**) to render them in **Light Blue/Cyan** color.
+   - **Visual Emphasis:** Use **Bold** formatting for significant Islamic terminology (e.g., **Tawhid**, **Taqwa**) to render them in **GOLD** color.
 """
 
 # --- 7. SESSION MANAGEMENT (GEMINI 1.5 FLASH) ---
