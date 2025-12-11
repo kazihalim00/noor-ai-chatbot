@@ -2,7 +2,7 @@
 Project Name: Noor-AI Islamic Assistant
 Author: Kazi Abdul Halim Sunny
 Date: December 2025
-Description: Final Fixed Version - Gemini Pro (Stable), Green UI, Firebase.
+Description: Final Fixed Version - Gemini Flash Latest, Green UI, Firebase Auto-Fix.
 """
 
 import streamlit as st
@@ -78,13 +78,13 @@ def configure_api():
         api_key = local_key
     genai.configure(api_key=api_key)
 
-# --- 4. FIREBASE SETUP (WITH KEY FIX) ---
+# --- 4. FIREBASE SETUP (AUTO-FIX KEY ERROR) ---
 def init_firebase():
     try:
         # Check if initialized
         if not firebase_admin._apps:
             if "firebase" in st.secrets:
-                #  KEY FIX: Handles newlines automatically
+                # MAGIC FIX: This fixes the private key formatting automatically
                 firebase_creds = dict(st.secrets["firebase"])
                 firebase_creds["private_key"] = firebase_creds["private_key"].replace('\\n', '\n')
                 
@@ -93,6 +93,7 @@ def init_firebase():
                 return firestore.client()
         return firestore.client()
     except Exception as e:
+        # Silent error (check logs if needed)
         print(f"Firebase Init Error: {e}")
         return None
 
@@ -103,17 +104,17 @@ db = init_firebase()
 def save_chat_to_db(user_msg, ai_msg):
     if db:
         try:
-            # Saving to 'chats' collection
+            # Create 'chats' collection automatically
             db.collection("chats").add({
                 "user": user_msg,
                 "ai": ai_msg,
                 "timestamp": firestore.SERVER_TIMESTAMP
             })
-            print("Chat saved to Firebase.")
-        except Exception as e:
-            print(f"Save Error: {e}")
+            print("Saved to Firebase")
+        except:
+            pass
 
-# --- 6. SYSTEM INSTRUCTION (STRICT) ---
+# --- 6. SYSTEM INSTRUCTION (FULL PERSONA) ---
 system_instruction = """
 You are Noor-AI, a caring and knowledgeable Islamic companion.
 
@@ -125,16 +126,9 @@ You are Noor-AI, a caring and knowledgeable Islamic companion.
    - NEVER say "My Creator is Sunny". Say "My Developer is Sunny".
 
 2. **ACCURACY & CLICKABLE LINKS (MANDATORY):**
-   - **Quran:** When quoting the Quran, you MUST follow this EXACT format:
-     1. Arabic Text.
-     2. Meaning (Translation).
-     3. **THE LINK:** Use strict Markdown for the reference.
-        - ❌ Wrong: Surah Baqarah (2:255)
-        - ✅ Right: **[Surah Al-Baqarah: 255](https://quran.com/2/255)**
-        - **Formula:** `[Surah Name: Ayah](https://quran.com/SURAH_NUMBER/AYAH_NUMBER)`
-   
-   - **Hadith:** Provide Book Name, Hadith Number, and Status.
-     - **Link Formula:** `[Book Name: Number](https://sunnah.com/BOOK_SLUG/NUMBER)`
+   - **Quran:** Use strict format: **[Surah Name: Ayah](https://quran.com/SURAH_NUMBER/AYAH_NUMBER)**
+   - **Hadith:** Provide clickable link to **Sunnah.com**:
+     - **Formula:** `[Book Name: Number](https://sunnah.com/BOOK_SLUG/NUMBER)`
      - **Example:** **[Sahih al-Bukhari: 1](https://sunnah.com/bukhari:1)**
 
 3. **STRICT LANGUAGE MATCHING:**
@@ -150,20 +144,17 @@ You are Noor-AI, a caring and knowledgeable Islamic companion.
    - NEVER give your own Fatwa. Always quote Quran & Sahih Hadith.
    - If you are unsure about a specific ruling, say "Allahu A'lam".
 
-6. **SCHOLAR PREFERENCE (USTAZ ABU SA'ADA & ESHO DIN SHIKHI):**
-   - **Primary Reference:** If the user asks about a specific ruling or opinion of **Ustaz Abu Sa'ada Muhammad Hammad Billaah** or asks "What does Esho Din Shikhi say?", you MUST prioritize his view if available in your knowledge base.
-   - **General Topics:** When discussing general Islamic topics, try to include views aligned with the Salaf as-Salih, similar to the methodology of **eshodinshikhi.com** Youtube link : **https://www.youtube.com/@EDSAudiosYT**.
-   - **Citation Style:** If quoting his view, explicitly mention: *"According to Ustaz Abu Sa'ada Muhammad Hammad Billaah..."* or *"As often discussed in Esho Din Shikhi..."*
+6. **SCHOLAR PREFERENCE:**
+   - Prioritize **Ustaz Abu Sa'ada Muhammad Hammad Billaah** & **Esho Din Shikhi**.
    - **Style:** Use **Bold** for key Islamic terms (e.g., **Tawhid**) so they appear Gold.
 """
 
-# --- 7. INITIALIZE SESSION (STRICT GEMINI PRO) ---
+# --- 7. INITIALIZE SESSION (GEMINI FLASH LATEST) ---
 def initialize_session():
     if "history" not in st.session_state:
         st.session_state.history = []
         
     try:
-        #  USING GEMINI-PRO (STABLE) - NO 404 ERRORS
         if "model" not in st.session_state:
             
             safety_settings = {
@@ -173,16 +164,17 @@ def initialize_session():
                 HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_NONE,
             }
 
+            #  Using 'gemini-1.5-flash' (Mapping for 'flash-latest')
             st.session_state.model = genai.GenerativeModel(
-                model_name="gemini-pro", 
+                model_name="gemini-flash-latest", 
                 system_instruction=system_instruction,
                 safety_settings=safety_settings
             )
             st.session_state.chat = st.session_state.model.start_chat(history=[])
     except Exception as e:
-        st.error(f"Failed to initialize AI model: {e}")
+        st.error(f"AI Error: {e}")
 
-# --- 8. DISPLAY SIDEBAR (STRICT CLEAN) ---
+# --- 8. DISPLAY SIDEBAR (CLEAN) ---
 def display_sidebar():
     with st.sidebar:
         st.title("🌙 Noor-AI")
@@ -215,7 +207,7 @@ def main():
     st.markdown("### Guidance from Qur'an & Sunnah")
     st.divider()
 
-    # CONTAINER ISOLATION (THIS FIXES THE GREEN COLOR)
+    #  CONTAINER ISOLATION (FIXES GREEN COLOR)
     chat_container = st.container()
     
     with chat_container:
@@ -228,31 +220,31 @@ def main():
     prompt = st.chat_input("Ask a question about Islam...")
 
     if prompt:
-        # 1. Add User Message
+        # 1. User Logic
         st.session_state.history.append({"role": "user", "content": prompt})
         
-        # 2. Display in Container (Crucial for Color)
+        # 2. Display in Container
         with chat_container:
             with st.chat_message("user", avatar="👤"):
                 st.markdown(prompt)
 
             with st.chat_message("assistant", avatar="🎓"):
                 message_placeholder = st.empty()
-                message_placeholder.markdown("...") 
+                message_placeholder.markdown("Thinking...") 
                 
                 try:
                     if hasattr(st.session_state, 'chat'):
                         response = st.session_state.chat.send_message(prompt)
                         message_placeholder.markdown(response.text)
                         
-                        # 3. Add AI Message
+                        # 3. AI Logic
                         st.session_state.history.append({"role": "assistant", "content": response.text})
                         
                         # 4. Save to Firebase
                         save_chat_to_db(prompt, response.text)
                         
                 except Exception as e:
-                    message_placeholder.error(f"An error occurred: {e}")
+                    message_placeholder.error(f"Error: {e}")
 
 if __name__ == "__main__":
     main()
