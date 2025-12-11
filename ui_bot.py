@@ -2,7 +2,7 @@
 Project Name: Noor-AI Islamic Assistant
 Author: Kazi Abdul Halim Sunny
 Date: December 2025
-Description: PROFESSIONAL CLOUD VERSION - Secrets Integration, Green/Gold UI, Strict Persona.
+Description: PROFESSIONAL CLOUD VERSION - Secrets Integration, Elegant Green/Gold UI.
 """
 
 import streamlit as st
@@ -19,63 +19,84 @@ def setup_page_config():
         layout="centered"
     )
 
-# --- 2. CSS: PROFESSIONAL GREEN & GOLD THEME ---
+# --- 2. CSS: ELEGANT & COMFORTABLE GREEN-GOLD THEME ---
 def apply_custom_styles():
     st.markdown("""
         <style>
-        /* General App Background */
-        .stApp { background-color: #121212; color: #FFFFFF; }
+        /* General App Background - keeping it dark for eye comfort */
+        .stApp { background-color: #0E1117; color: #E0E0E0; }
         
-        /* Headers - Elegant Font */
-        h1 { color: #E0E0E0 !important; font-family: 'Helvetica Neue', sans-serif; text-align: center; font-weight: 300; letter-spacing: 1px; }
-        .stMarkdown h3 { color: #FDD835 !important; text-align: center; font-weight: 400; }
+        /* Headers - Elegant Font & Muted Gold */
+        h1 { 
+            color: #E6C15C !important; /* Antique Gold - soothing */
+            font-family: 'Helvetica Neue', sans-serif; 
+            text-align: center; 
+            font-weight: 300; 
+            letter-spacing: 1px; 
+            border-bottom: 1px solid #333;
+            padding-bottom: 10px;
+        }
+        .stMarkdown h3 { 
+            color: #D4AF37 !important; /* Metallic Gold */
+            text-align: center; 
+            font-weight: 400; 
+        }
         
         /* Sidebar Styling */
-        [data-testid="stSidebar"] { background-color: #000000; border-right: 1px solid #333; }
+        [data-testid="stSidebar"] { background-color: #000000; border-right: 1px solid #222; }
         
         /* Input Field Styling */
-        .stTextInput input { background-color: #333333 !important; color: white !important; border: 1px solid #555; border-radius: 20px; padding-left: 15px; }
+        .stTextInput input { 
+            background-color: #1E1E1E !important; 
+            color: #E0E0E0 !important; 
+            border: 1px solid #444; 
+            border-radius: 20px; 
+            padding-left: 15px; 
+        }
         
         /* --- CHAT INTERFACE STYLING --- */
         
-        /* User Message (Odd) - Subtle Grey */
+        /* User Message (Odd) - Clean Grey */
         div[data-testid="stChatMessage"]:nth-of-type(odd) {
-            background-color: #262626 !important;
-            border: 1px solid #444 !important;
+            background-color: #262730 !important;
+            border: 1px solid #3E3E3E !important;
             border-radius: 12px;
             padding: 15px;
             margin-bottom: 12px;
         }
 
-        /* AI Message (Even) - Deep Islamic Green */
+        /* AI Message (Even) - COMFORTABLE ISLAMIC THEME */
         div[data-testid="stChatMessage"]:nth-of-type(even) {
-            background-color: #0d3b1e !important;
-            border: 1px solid #1e5c30 !important;
-            border-radius: 12px;
+            background-color: #14281D !important; /* Deep Matte Green - Easy on eyes */
+            border: 1px solid #4A5D23 !important; /* Subtle Olive/Gold Border */
+            border-left: 4px solid #C5A059 !important; /* Premium Gold Accent Line */
+            border-radius: 8px 12px 12px 8px;
             padding: 15px;
             margin-bottom: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
         
-        /* Text Visibility */
+        /* Text Visibility inside AI Bubble */
         div[data-testid="stChatMessage"]:nth-of-type(even) p,
         div[data-testid="stChatMessage"]:nth-of-type(even) div,
         div[data-testid="stChatMessage"]:nth-of-type(even) li {
-             color: #e8f5e9 !important; 
-             line-height: 1.6;
+             color: #E8F5E9 !important; /* Soft White/Greenish White - High readability */
+             line-height: 1.7;
+             font-family: 'Georgia', sans-serif; /* Slight Serif for book-like feel */
         }
 
-        /* Key Terms - Golden & Bold */
+        /* Key Terms - Soft Gold (Not Neon) */
         div[data-testid="stChatMessage"]:nth-of-type(even) strong { 
-            color: #FFD700 !important; 
-            font-weight: 700 !important; 
+            color: #F0E68C !important; /* Khaki/Soft Gold */
+            font-weight: 600 !important; 
         }
 
-        /* Hyperlinks - Distinct Blue */
+        /* Hyperlinks - Gold-Cyan Blend */
         div[data-testid="stChatMessage"]:nth-of-type(even) a { 
-            color: #4fc3f7 !important; 
+            color: #80CBC4 !important; /* Teal/Light Cyan - blends well with green */
             text-decoration: none !important; 
-            border-bottom: 1px dotted #4fc3f7;
-            font-weight: 600; 
+            border-bottom: 1px dotted #80CBC4;
+            font-weight: 500; 
         }
         
         /* Mobile Responsiveness */
@@ -86,12 +107,10 @@ def apply_custom_styles():
 # --- 3. API CONFIGURATION (CLOUD SECRETS) ---
 def configure_api():
     try:
-        # This checks Streamlit Cloud Secrets
         if "GOOGLE_API_KEY" in st.secrets:
             api_key = st.secrets["GOOGLE_API_KEY"]
             genai.configure(api_key=api_key)
         else:
-            # If running locally without secrets file
             st.error("Configuration Error: GOOGLE_API_KEY not found in Secrets.")
             st.stop()
     except Exception as e:
@@ -104,7 +123,6 @@ def init_firebase():
             if "firebase" in st.secrets:
                 firebase_creds = dict(st.secrets["firebase"])
                 if "private_key" in firebase_creds:
-                    # Fix for private key newlines in Cloud
                     firebase_creds["private_key"] = firebase_creds["private_key"].replace('\\n', '\n')
                 cred = credentials.Certificate(firebase_creds)
                 firebase_admin.initialize_app(cred)
@@ -180,7 +198,7 @@ def display_sidebar():
     with st.sidebar:
         st.title("🌙 Noor-AI")
         st.markdown("---") 
-        st.markdown("**Lead Developer:**")
+        st.markdown("**Developer:**")
         st.markdown("### Kazi Abdul Halim Sunny")
         
         st.markdown("---")
