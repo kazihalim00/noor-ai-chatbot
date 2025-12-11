@@ -2,7 +2,7 @@
 Project Name: Noor-AI Islamic Assistant
 Author: Kazi Abdul Halim Sunny
 Date: December 2025
-Description: Final Version -  Hadith Links + Firebase + Green UI.
+Description: Final Presentation Version (Green UI, Firebase, Strict Persona).
 """
 
 import streamlit as st
@@ -19,7 +19,7 @@ def setup_page_config():
         layout="centered"
     )
 
-# --- 2. APPLY CUSTOM STYLES (Green/Gold/Container Fix) ---
+# --- 2. APPLY STRONG CSS (GREEN/GOLD FIX) ---
 def apply_custom_styles():
     st.markdown("""
         <style>
@@ -32,25 +32,23 @@ def apply_custom_styles():
         
         /* Sidebar */
         [data-testid="stSidebar"] { background-color: #000000; border-right: 1px solid #333; }
-        
-        /* Input Box */
         .stTextInput input { background-color: #333333 !important; color: white !important; border: 1px solid #555; border-radius: 20px; }
         
-        /* --- CHAT STYLING (Container Fix) --- */
+        /* --- CHAT COLOR FIX (Container Isolation) --- */
         
         /* User (Odd) -> Grey */
         [data-testid="stVerticalBlock"] > [style*="flex-direction: column;"] > [data-testid="stChatMessage"]:nth-of-type(odd) {
-            background-color: #262626 !important; 
-            border: 1px solid #444 !important; 
-            border-radius: 12px; 
+            background-color: #262626 !important;
+            border: 1px solid #444 !important;
+            border-radius: 12px;
             padding: 15px;
         }
 
         /* AI (Even) -> Deep Green */
         [data-testid="stVerticalBlock"] > [style*="flex-direction: column;"] > [data-testid="stChatMessage"]:nth-of-type(even) {
-            background-color: #0d3b1e !important; 
-            border: 1px solid #1e5c30 !important; 
-            border-radius: 12px; 
+            background-color: #0d3b1e !important;
+            border: 1px solid #1e5c30 !important;
+            border-radius: 12px;
             padding: 15px;
         }
         
@@ -63,7 +61,7 @@ def apply_custom_styles():
         /* Links -> Blue */
         [data-testid="stChatMessage"]:nth-of-type(even) a { color: #4fc3f7 !important; text-decoration: underline !important; font-weight: bold; }
         
-        /* Mobile Table Fix */
+        /* Table Fix */
         .stMarkdown table { display: block; overflow-x: auto; white-space: nowrap; width: 100%; }
         </style>
     """, unsafe_allow_html=True)
@@ -80,18 +78,25 @@ def configure_api():
         api_key = local_key
     genai.configure(api_key=api_key)
 
-# --- 4. FIREBASE SETUP (Silent) ---
-db = None
-try:
-    if not firebase_admin._apps:
-        if "firebase" in st.secrets:
-            cred = credentials.Certificate(dict(st.secrets["firebase"]))
-            firebase_admin.initialize_app(cred)
-            db = firestore.client()
-    else:
-        db = firestore.client()
-except Exception as e:
-    print(f"Firebase Error: {e}")
+# --- 4. FIREBASE SETUP (FIXED PRIVATE KEY ISSUE) ---
+def init_firebase():
+    try:
+        if not firebase_admin._apps:
+            if "firebase" in st.secrets:
+                # KEY FIX: Handles newlines automatically
+                firebase_creds = dict(st.secrets["firebase"])
+                firebase_creds["private_key"] = firebase_creds["private_key"].replace('\\n', '\n')
+                
+                cred = credentials.Certificate(firebase_creds)
+                firebase_admin.initialize_app(cred)
+                return firestore.client()
+        return firestore.client()
+    except Exception as e:
+        print(f"DB Init Error: {e}")
+        return None
+
+# Initialize DB Globally
+db = init_firebase()
 
 # --- 5. SAVE FUNCTION ---
 def save_chat_to_db(user_msg, ai_msg):
@@ -102,25 +107,11 @@ def save_chat_to_db(user_msg, ai_msg):
                 "ai": ai_msg,
                 "timestamp": firestore.SERVER_TIMESTAMP
             })
+            print("Saved to DB")
         except:
             pass
 
-# --- 6. AUTO MODEL DETECTION ---
-def get_working_model():
-    print("Checking models...", end="\r")
-    try:
-        for m in genai.list_models():
-            if 'generateContent' in m.supported_generation_methods:
-                if "flash" in m.name or "pro" in m.name:
-                    return m.name
-        for m in genai.list_models():
-             if 'generateContent' in m.supported_generation_methods:
-                 return m.name
-    except:
-        return "models/gemini-1.5-flash"
-    return "models/gemini-1.5-flash"
-
-# --- 7. SYSTEM INSTRUCTION (BENGALI BIO RESTORED) ---
+# --- 6. SYSTEM INSTRUCTION (STRICT) ---
 system_instruction = """
 You are Noor-AI, a caring and knowledgeable Islamic companion.
 
@@ -129,18 +120,24 @@ You are Noor-AI, a caring and knowledgeable Islamic companion.
 1. **THEOLOGICAL SAFETY (AQEEDAH):**
    - **Creator:** ONLY Allah is the Creator. NEVER attribute this title to a human.
    - **Developer:** If asked who made you, reply: "I was developed/programmed by **Kazi Abdul Halim Sunny**."
+   - NEVER say "My Creator is Sunny". Say "My Developer is Sunny".
 
 2. **ACCURACY & CLICKABLE LINKS (MANDATORY):**
-   - **Quran:** Use format: **[Surah Name: Ayah](https://quran.com/SURAH_NUMBER/AYAH_NUMBER)**.
+   - **Quran:** When quoting the Quran, you MUST follow this EXACT format:
+     1. Arabic Text.
+     2. Meaning (Translation).
+     3. **THE LINK:** Use strict Markdown for the reference.
+        - ❌ Wrong: Surah Baqarah (2:255)
+        - ✅ Right: **[Surah Al-Baqarah: 255](https://quran.com/2/255)**
+        - **Formula:** `[Surah Name: Ayah](https://quran.com/SURAH_NUMBER/AYAH_NUMBER)`
    
-   - **Hadith:** You MUST provide a clickable link to **Sunnah.com** for major books.
-     - **Formula:** `[Book Name: Number](https://sunnah.com/BOOK_SLUG/NUMBER)`
-     - **Slugs:** `bukhari`, `muslim`, `nasai`, `abudawud`, `tirmidhi`, `ibnmajah`, `malik`.
+   - **Hadith:** Provide Book Name, Hadith Number, and Status.
+     - **Link Formula:** `[Book Name: Number](https://sunnah.com/BOOK_SLUG/NUMBER)`
      - **Example:** **[Sahih al-Bukhari: 1](https://sunnah.com/bukhari:1)**
 
 3. **STRICT LANGUAGE MATCHING:**
-   - English Q -> English Ans.
-   - Bangla Q -> Bangla Ans.
+   - **English Q** -> **English Ans** only.
+   - **Bangla Q** -> **Bangla Ans** only.
 
 4. **IDENTITY & BIO:**
    - **Developer:** Kazi Abdul Halim Sunny.
@@ -149,20 +146,22 @@ You are Noor-AI, a caring and knowledgeable Islamic companion.
 
 5. **SOURCE TRUTH:**
    - NEVER give your own Fatwa. Always quote Quran & Sahih Hadith.
+   - If you are unsure about a specific ruling, say "Allahu A'lam".
 
-6. **SCHOLAR PREFERENCE:**
-   - Prioritize **Ustaz Abu Sa'ada Muhammad Hammad Billaah** & **Esho Din Shikhi**.
-   - Use **Bold** for key Islamic terms (e.g., **Tawhid**) so they appear Gold.
+6. **SCHOLAR PREFERENCE (USTAZ ABU SA'ADA & ESHO DIN SHIKHI):**
+   - **Primary Reference:** If the user asks about a specific ruling or opinion of **Ustaz Abu Sa'ada Muhammad Hammad Billaah** or asks "What does Esho Din Shikhi say?", you MUST prioritize his view if available in your knowledge base.
+   - **General Topics:** When discussing general Islamic topics, try to include views aligned with the Salaf as-Salih, similar to the methodology of **eshodinshikhi.com** Youtube link : **https://www.youtube.com/@EDSAudiosYT**.
+   - **Citation Style:** If quoting his view, explicitly mention: *"According to Ustaz Abu Sa'ada Muhammad Hammad Billaah..."* or *"As often discussed in Esho Din Shikhi..."*
+   - **Style:** Use **Bold** for key Islamic terms (e.g., **Tawhid**) so they appear Gold.
 """
 
-# --- 8. INITIALIZE SESSION ---
+# --- 7. INITIALIZE SESSION (STRICT GEMINI 1.5 FLASH) ---
 def initialize_session():
     if "history" not in st.session_state:
         st.session_state.history = []
         
     try:
         if "model" not in st.session_state:
-            detected_model_name = get_working_model()
             
             safety_settings = {
                 HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_NONE,
@@ -171,8 +170,9 @@ def initialize_session():
                 HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_NONE,
             }
 
+            # STRICTLY USING 1.5 FLASH (Best for Presentation)
             st.session_state.model = genai.GenerativeModel(
-                model_name=detected_model_name, 
+                model_name="gemini-1.5-flash", 
                 system_instruction=system_instruction,
                 safety_settings=safety_settings
             )
@@ -180,7 +180,7 @@ def initialize_session():
     except Exception as e:
         st.error(f"Failed to initialize AI model: {e}")
 
-# --- 9. DISPLAY SIDEBAR ---
+# --- 8. DISPLAY SIDEBAR (STRICT CLEAN) ---
 def display_sidebar():
     with st.sidebar:
         st.title("🌙 Noor-AI")
@@ -201,7 +201,7 @@ def display_sidebar():
             
             st.download_button("📥 Download Chat", chat_str, "noor_ai_chat.txt", "text/plain")
 
-# --- 10. MAIN APP FUNCTION ---
+# --- 9. MAIN APP FUNCTION ---
 def main():
     setup_page_config()
     apply_custom_styles()
@@ -213,7 +213,7 @@ def main():
     st.markdown("### Guidance from Qur'an & Sunnah")
     st.divider()
 
-    # Container Isolation for Color Fix
+    # Container Isolation (Ensures Green Color)
     chat_container = st.container()
     
     with chat_container:
@@ -243,7 +243,6 @@ def main():
                         
                         st.session_state.history.append({"role": "assistant", "content": response.text})
                         
-                        # Save to Firebase
                         save_chat_to_db(prompt, response.text)
                         
                 except Exception as e:
