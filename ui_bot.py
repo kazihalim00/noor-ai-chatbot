@@ -2,7 +2,7 @@
 Project Name: Noor-AI Islamic Assistant
 Author: Kazi Abdul Halim Sunny
 Date: December 2025
-Description: Final Presentation Version (Green UI, Firebase, Strict Persona).
+Description: Final Fixed Version - Gemini Pro (Stable), Green UI, Firebase.
 """
 
 import streamlit as st
@@ -19,7 +19,7 @@ def setup_page_config():
         layout="centered"
     )
 
-# --- 2. APPLY STRONG CSS (GREEN/GOLD FIX) ---
+# --- 2. APPLY STRONG CSS (GREEN & GOLD FIX) ---
 def apply_custom_styles():
     st.markdown("""
         <style>
@@ -36,7 +36,7 @@ def apply_custom_styles():
         
         /* --- CHAT COLOR FIX (Container Isolation) --- */
         
-        /* User (Odd) -> Grey */
+        /* User Message (Odd) -> Grey */
         [data-testid="stVerticalBlock"] > [style*="flex-direction: column;"] > [data-testid="stChatMessage"]:nth-of-type(odd) {
             background-color: #262626 !important;
             border: 1px solid #444 !important;
@@ -44,7 +44,7 @@ def apply_custom_styles():
             padding: 15px;
         }
 
-        /* AI (Even) -> Deep Green */
+        /* AI Message (Even) -> Deep Green */
         [data-testid="stVerticalBlock"] > [style*="flex-direction: column;"] > [data-testid="stChatMessage"]:nth-of-type(even) {
             background-color: #0d3b1e !important;
             border: 1px solid #1e5c30 !important;
@@ -52,13 +52,13 @@ def apply_custom_styles():
             padding: 15px;
         }
         
-        /* Text -> White */
+        /* AI Text -> White */
         [data-testid="stChatMessage"]:nth-of-type(even) * { color: #e8f5e9 !important; }
 
-        /* Keywords -> Gold */
+        /* AI Keywords -> Gold */
         [data-testid="stChatMessage"]:nth-of-type(even) strong { color: #FFD700 !important; font-weight: bold !important; }
 
-        /* Links -> Blue */
+        /* AI Links -> Blue */
         [data-testid="stChatMessage"]:nth-of-type(even) a { color: #4fc3f7 !important; text-decoration: underline !important; font-weight: bold; }
         
         /* Table Fix */
@@ -78,12 +78,13 @@ def configure_api():
         api_key = local_key
     genai.configure(api_key=api_key)
 
-# --- 4. FIREBASE SETUP (FIXED PRIVATE KEY ISSUE) ---
+# --- 4. FIREBASE SETUP (WITH KEY FIX) ---
 def init_firebase():
     try:
+        # Check if initialized
         if not firebase_admin._apps:
             if "firebase" in st.secrets:
-                # KEY FIX: Handles newlines automatically
+                #  KEY FIX: Handles newlines automatically
                 firebase_creds = dict(st.secrets["firebase"])
                 firebase_creds["private_key"] = firebase_creds["private_key"].replace('\\n', '\n')
                 
@@ -92,7 +93,7 @@ def init_firebase():
                 return firestore.client()
         return firestore.client()
     except Exception as e:
-        print(f"DB Init Error: {e}")
+        print(f"Firebase Init Error: {e}")
         return None
 
 # Initialize DB Globally
@@ -102,14 +103,15 @@ db = init_firebase()
 def save_chat_to_db(user_msg, ai_msg):
     if db:
         try:
+            # Saving to 'chats' collection
             db.collection("chats").add({
                 "user": user_msg,
                 "ai": ai_msg,
                 "timestamp": firestore.SERVER_TIMESTAMP
             })
-            print("Saved to DB")
-        except:
-            pass
+            print("Chat saved to Firebase.")
+        except Exception as e:
+            print(f"Save Error: {e}")
 
 # --- 6. SYSTEM INSTRUCTION (STRICT) ---
 system_instruction = """
@@ -155,12 +157,13 @@ You are Noor-AI, a caring and knowledgeable Islamic companion.
    - **Style:** Use **Bold** for key Islamic terms (e.g., **Tawhid**) so they appear Gold.
 """
 
-# --- 7. INITIALIZE SESSION (STRICT GEMINI 1.5 FLASH) ---
+# --- 7. INITIALIZE SESSION (STRICT GEMINI PRO) ---
 def initialize_session():
     if "history" not in st.session_state:
         st.session_state.history = []
         
     try:
+        #  USING GEMINI-PRO (STABLE) - NO 404 ERRORS
         if "model" not in st.session_state:
             
             safety_settings = {
@@ -170,9 +173,8 @@ def initialize_session():
                 HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_NONE,
             }
 
-            # STRICTLY USING 1.5 FLASH (Best for Presentation)
             st.session_state.model = genai.GenerativeModel(
-                model_name="gemini-1.5-flash", 
+                model_name="gemini-pro", 
                 system_instruction=system_instruction,
                 safety_settings=safety_settings
             )
@@ -213,7 +215,7 @@ def main():
     st.markdown("### Guidance from Qur'an & Sunnah")
     st.divider()
 
-    # Container Isolation (Ensures Green Color)
+    # CONTAINER ISOLATION (THIS FIXES THE GREEN COLOR)
     chat_container = st.container()
     
     with chat_container:
@@ -226,8 +228,10 @@ def main():
     prompt = st.chat_input("Ask a question about Islam...")
 
     if prompt:
+        # 1. Add User Message
         st.session_state.history.append({"role": "user", "content": prompt})
         
+        # 2. Display in Container (Crucial for Color)
         with chat_container:
             with st.chat_message("user", avatar="👤"):
                 st.markdown(prompt)
@@ -241,8 +245,10 @@ def main():
                         response = st.session_state.chat.send_message(prompt)
                         message_placeholder.markdown(response.text)
                         
+                        # 3. Add AI Message
                         st.session_state.history.append({"role": "assistant", "content": response.text})
                         
+                        # 4. Save to Firebase
                         save_chat_to_db(prompt, response.text)
                         
                 except Exception as e:
