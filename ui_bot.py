@@ -2,7 +2,7 @@
 Project Name: Noor-AI Islamic Assistant
 Author: Kazi Abdul Halim Sunny
 Date: December 2025
-Description: PROFESSIONAL CLOUD VERSION - Secrets Integration, Elegant Green/Gold UI.
+Description: PROFESSIONAL CLOUD VERSION - Clear Fonts, Blue/Silver UI.
 """
 
 import streamlit as st
@@ -19,83 +19,89 @@ def setup_page_config():
         layout="centered"
     )
 
-# --- 2. CSS: ELEGANT & COMFORTABLE GREEN-GOLD THEME ---
+# --- 2. CSS: CLEAR FONT & DECENT BLUE THEME ---
 def apply_custom_styles():
     st.markdown("""
         <style>
-        /* General App Background - keeping it dark for eye comfort */
-        .stApp { background-color: #0E1117; color: #E0E0E0; }
+        /* Import clean font for straight numbers */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap');
+
+        /* General App Background - Dark Slate Blue (Night Mode friendly) */
+        .stApp { background-color: #0F172A; color: #E2E8F0; }
         
-        /* Headers - Elegant Font & Muted Gold */
+        /* Headers - Silver & Light Blue */
         h1 { 
-            color: #E6C15C !important; /* Antique Gold - soothing */
-            font-family: 'Helvetica Neue', sans-serif; 
+            color: #E2E8F0 !important; /* Soft Silver */
+            font-family: 'Inter', sans-serif; 
             text-align: center; 
-            font-weight: 300; 
-            letter-spacing: 1px; 
-            border-bottom: 1px solid #333;
+            font-weight: 600; 
+            letter-spacing: 0.5px; 
+            border-bottom: 1px solid #334155;
             padding-bottom: 10px;
         }
         .stMarkdown h3 { 
-            color: #D4AF37 !important; /* Metallic Gold */
+            color: #94A3B8 !important; /* Muted Blue-Grey */
             text-align: center; 
-            font-weight: 400; 
+            font-weight: 500; 
         }
         
         /* Sidebar Styling */
-        [data-testid="stSidebar"] { background-color: #000000; border-right: 1px solid #222; }
+        [data-testid="stSidebar"] { background-color: #020617; border-right: 1px solid #1E293B; }
         
         /* Input Field Styling */
         .stTextInput input { 
-            background-color: #1E1E1E !important; 
-            color: #E0E0E0 !important; 
-            border: 1px solid #444; 
+            background-color: #1E293B !important; 
+            color: #F8FAFC !important; 
+            border: 1px solid #334155; 
             border-radius: 20px; 
             padding-left: 15px; 
+            font-family: 'Inter', sans-serif;
         }
         
         /* --- CHAT INTERFACE STYLING --- */
         
-        /* User Message (Odd) - Clean Grey */
+        /* User Message (Odd) - Dark Grey */
         div[data-testid="stChatMessage"]:nth-of-type(odd) {
-            background-color: #262730 !important;
-            border: 1px solid #3E3E3E !important;
+            background-color: #1E293B !important;
+            border: 1px solid #334155 !important;
             border-radius: 12px;
             padding: 15px;
             margin-bottom: 12px;
+            font-family: 'Inter', sans-serif;
         }
 
-        /* AI Message (Even) - COMFORTABLE ISLAMIC THEME */
+        /* AI Message (Even) - DECENT BLUE THEME */
         div[data-testid="stChatMessage"]:nth-of-type(even) {
-            background-color: #14281D !important; /* Deep Matte Green - Easy on eyes */
-            border: 1px solid #4A5D23 !important; /* Subtle Olive/Gold Border */
-            border-left: 4px solid #C5A059 !important; /* Premium Gold Accent Line */
+            background-color: #172554 !important; /* Deep Royal Blue (Not Green) */
+            border: 1px solid #1E3A8A !important; /* Dark Blue Border */
+            border-left: 4px solid #60A5FA !important; /* Soft Sky Blue Accent (Not Gold) */
             border-radius: 8px 12px 12px 8px;
             padding: 15px;
             margin-bottom: 12px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
         
-        /* Text Visibility inside AI Bubble */
+        /* Text Visibility inside AI Bubble - Clear & Straight */
         div[data-testid="stChatMessage"]:nth-of-type(even) p,
         div[data-testid="stChatMessage"]:nth-of-type(even) div,
         div[data-testid="stChatMessage"]:nth-of-type(even) li {
-             color: #E8F5E9 !important; /* Soft White/Greenish White - High readability */
+             color: #F1F5F9 !important; /* Very Light Blue-White */
              line-height: 1.7;
-             font-family: 'Georgia', sans-serif; /* Slight Serif for book-like feel */
+             font-family: 'Inter', sans-serif !important; /* STRAIGHT FONT (No crooked numbers) */
+             font-size: 16px;
         }
 
-        /* Key Terms - Soft Gold (Not Neon) */
+        /* Key Terms - Sky Blue instead of Gold */
         div[data-testid="stChatMessage"]:nth-of-type(even) strong { 
-            color: #F0E68C !important; /* Khaki/Soft Gold */
-            font-weight: 600 !important; 
+            color: #93C5FD !important; /* Light Blue Highlight */
+            font-weight: 700 !important; 
         }
 
-        /* Hyperlinks - Gold-Cyan Blend */
+        /* Hyperlinks - Cyan */
         div[data-testid="stChatMessage"]:nth-of-type(even) a { 
-            color: #80CBC4 !important; /* Teal/Light Cyan - blends well with green */
+            color: #22D3EE !important; /* Cyan/Teal */
             text-decoration: none !important; 
-            border-bottom: 1px dotted #80CBC4;
+            border-bottom: 1px dotted #22D3EE;
             font-weight: 500; 
         }
         
@@ -178,7 +184,7 @@ You are Noor-AI, a sophisticated and caring Islamic companion dedicated to provi
 
 6. **SCHOLARLY REFERENCE PRIORITY:**
    - Prioritize insights from **Ustaz Abu Sa'ada Muhammad Hammad Billaah** & **Esho Din Shikhi**.
-   - **Visual Emphasis:** Use **Bold** formatting for significant Islamic terminology (e.g., **Tawhid**, **Taqwa**) to render them in **GOLD** color.
+   - **Visual Emphasis:** Use **Bold** formatting for significant Islamic terminology (e.g., **Tawhid**, **Taqwa**) to render them in **Light Blue/Cyan** color.
 """
 
 # --- 7. SESSION MANAGEMENT (GEMINI 1.5 FLASH) ---
