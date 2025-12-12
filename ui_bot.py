@@ -2,7 +2,7 @@
 Project Name: Noor-AI Islamic Assistant
 Author: Kazi Abdul Halim Sunny
 Date: December 2025
-Description: PROFESSIONAL CLOUD VERSION - Minimalist Dark, Clean Fonts, Zero Visual Noise.
+Description: PROFESSIONAL VERSION - Minimalist UI + Firebase Knowledge Retrieval (RAG).
 """
 
 import streamlit as st
@@ -10,6 +10,7 @@ import google.generativeai as genai
 from google.generativeai.types import HarmCategory, HarmBlockThreshold
 import firebase_admin
 from firebase_admin import credentials, firestore
+import os
 
 # --- 1. SETUP PAGE CONFIGURATION ---
 def setup_page_config():
@@ -19,7 +20,7 @@ def setup_page_config():
         layout="centered"
     )
 
-# --- 2. CSS: MINIMALIST & CLEAN (NO HEAVY COLORS) ---
+# --- 2. CSS: MINIMALIST & CLEAN (STRICTLY PRESERVED) ---
 def apply_custom_styles():
     st.markdown("""
         <style>
@@ -71,7 +72,7 @@ def apply_custom_styles():
 
         /* AI Message (Even) - SUBTLE GREY BOX (NO HEAVY COLORS) */
         div[data-testid="stChatMessage"]:nth-of-type(even) {
-            background-color: #1C1C1E !important; /* Very Light Charcoal - Easy on eyes */
+            background-color: #1C1C1E !important; /* Very Light Charcoal */
             border: 1px solid #2C2C2E !important; /* Subtle border */
             border-left: 3px solid #D4AF37 !important; /* Thin Elegant Gold Accent Line */
             border-radius: 6px 10px 10px 6px;
@@ -83,15 +84,15 @@ def apply_custom_styles():
         div[data-testid="stChatMessage"]:nth-of-type(even) p,
         div[data-testid="stChatMessage"]:nth-of-type(even) div,
         div[data-testid="stChatMessage"]:nth-of-type(even) li {
-             color: #E6E6E6 !important; /* Off-White for readability */
-             line-height: 1.8; /* Good spacing */
-             font-family: 'Inter', sans-serif !important; /* Straight, Modern Font */
+             color: #E6E6E6 !important; /* Off-White */
+             line-height: 1.8; 
+             font-family: 'Inter', sans-serif !important; 
              font-size: 16px;
         }
 
         /* Key Terms - Gold text only here */
         div[data-testid="stChatMessage"]:nth-of-type(even) strong { 
-            color: #FCD34D !important; /* Soft Gold for important words */
+            color: #FCD34D !important; /* Soft Gold */
             font-weight: 600 !important; 
         }
 
@@ -107,37 +108,76 @@ def apply_custom_styles():
         </style>
     """, unsafe_allow_html=True)
 
-# --- 3. API CONFIGURATION (CLOUD SECRETS) ---
+# --- 3. API CONFIGURATION ---
 def configure_api():
     try:
         if "GOOGLE_API_KEY" in st.secrets:
             api_key = st.secrets["GOOGLE_API_KEY"]
             genai.configure(api_key=api_key)
         else:
-            st.error("Configuration Error: GOOGLE_API_KEY not found in Secrets.")
+            st.error("⚠️ Configuration Error: GOOGLE_API_KEY not found in Secrets.")
             st.stop()
     except Exception as e:
         st.error(f"API Connection Failed: {e}")
 
-# --- 4. FIREBASE DATABASE INITIALIZATION ---
+# --- 4. FIREBASE INITIALIZATION (SMART HYBRID) ---
 def init_firebase():
-    try:
-        if not firebase_admin._apps:
-            if "firebase" in st.secrets:
-                firebase_creds = dict(st.secrets["firebase"])
-                if "private_key" in firebase_creds:
-                    firebase_creds["private_key"] = firebase_creds["private_key"].replace('\\n', '\n')
-                cred = credentials.Certificate(firebase_creds)
-                firebase_admin.initialize_app(cred)
-                return firestore.client()
+    # Check if app is already connected
+    if firebase_admin._apps:
         return firestore.client()
+
+    try:
+        # 1. Use local 'service_account.json' if available (For Local PC)
+        if os.path.exists("service_account.json"):
+            cred = credentials.Certificate("service_account.json")
+            firebase_admin.initialize_app(cred)
+            return firestore.client()
+            
+        # 2. Use 'st.secrets' if running on Cloud
+        elif "firebase" in st.secrets:
+            firebase_creds = dict(st.secrets["firebase"])
+            # Fix private key format for Streamlit Cloud
+            if "private_key" in firebase_creds:
+                firebase_creds["private_key"] = firebase_creds["private_key"].replace('\\n', '\n')
+            cred = credentials.Certificate(firebase_creds)
+            firebase_admin.initialize_app(cred)
+            return firestore.client()
+            
+        else:
+            return None
     except Exception as e:
-        print(f"Database Initialization Error: {e}")
+        print(f"Database Error: {e}")
         return None
 
 db = init_firebase()
 
-# --- 5. DATA LOGGING FUNCTION ---
+# --- 5. SMART KNOWLEDGE RETRIEVAL (NEW FEATURE) ---
+def get_knowledge_from_firebase(query):
+    if not db: return ""
+    
+    try:
+        # Fetch documents from 'knowledge_base' collection
+        docs = db.collection("knowledge_base").stream()
+        context_data = ""
+        query_words = query.lower().split()
+        
+        found_count = 0
+        for doc in docs:
+            data = doc.to_dict()
+            content = data.get("content", "")
+            title = data.get("title", "")
+            
+            # Simple keyword matching logic
+            if any(word in content.lower() for word in query_words if len(word) > 3):
+                context_data += f"SOURCE ARTICLE [{title}]:\n{content}\n\n"
+                found_count += 1
+                if found_count >= 2: break # Limit to top 2 relevant articles
+                
+        return context_data
+    except Exception:
+        return ""
+
+# --- 6. DATA LOGGING ---
 def save_chat_to_db(user_msg, ai_msg):
     if db:
         try:
@@ -146,11 +186,9 @@ def save_chat_to_db(user_msg, ai_msg):
                 "ai": ai_msg,
                 "timestamp": firestore.SERVER_TIMESTAMP
             })
-            print("Session data logged securely.")
-        except:
-            pass
+        except: pass
 
-# --- 6. SYSTEM INSTRUCTIONS (STRICT PROTOCOLS) ---
+# --- 7. SYSTEM INSTRUCTIONS (STRICTLY PRESERVED) ---
 system_instruction = """
 You are Noor-AI, a sophisticated and caring Islamic companion dedicated to providing accurate knowledge.
 
@@ -181,10 +219,11 @@ You are Noor-AI, a sophisticated and caring Islamic companion dedicated to provi
 
 6. **SCHOLARLY REFERENCE PRIORITY:**
    - Prioritize insights from **Ustaz Abu Sa'ada Muhammad Hammad Billaah** & **Esho Din Shikhi**.
+   - If 'SOURCE ARTICLE' is provided in context, use it to answer and mention it.
    - **Visual Emphasis:** Use **Bold** formatting for significant Islamic terminology (e.g., **Tawhid**, **Taqwa**) to render them in **GOLD** color.
 """
 
-# --- 7. SESSION MANAGEMENT (GEMINI 1.5 FLASH) ---
+# --- 8. SESSION MANAGEMENT ---
 def initialize_session():
     if "history" not in st.session_state:
         st.session_state.history = []
@@ -196,7 +235,7 @@ def initialize_session():
     except Exception as e:
         st.error(f"System Initialization Failure: {e}")
 
-# --- 8. SIDEBAR INTERFACE ---
+# --- 9. SIDEBAR INTERFACE ---
 def display_sidebar():
     with st.sidebar:
         st.title("🌙 Noor-AI")
@@ -213,7 +252,7 @@ def display_sidebar():
             st.markdown("---")
             st.download_button("📥 Export Conversation", chat_str, "noor_ai_session.txt")
 
-# --- 9. MAIN APPLICATION LOOP ---
+# --- 10. MAIN APPLICATION LOOP ---
 def main():
     setup_page_config()
     apply_custom_styles()
@@ -225,7 +264,7 @@ def main():
     st.markdown("### Authentic Guidance from Qur'an & Sunnah")
     st.divider()
 
-    # --- RENDER CHAT HISTORY (Preserves Visual Hierarchy) ---
+    # --- RENDER CHAT HISTORY ---
     for message in st.session_state.history:
         role = message["role"]
         avatar = "👤" if role == "user" else "🎓"
@@ -246,8 +285,27 @@ def main():
             placeholder = st.empty()
             placeholder.markdown("Analyzing sources...") 
             try:
+                # --- A. Check Database (RAG) ---
+                retrieved_context = get_knowledge_from_firebase(prompt)
+                
+                # --- B. Construct Prompt ---
+                if retrieved_context:
+                    # If data found, inject into prompt
+                    final_prompt = f"""
+                    Use the following CONTEXT from our database to answer the user's question.
+                    
+                    CONTEXT:
+                    {retrieved_context}
+                    
+                    USER QUESTION: {prompt}
+                    """
+                else:
+                    # If no data found, use standard prompt
+                    final_prompt = prompt
+
+                # --- C. Call AI Model ---
                 if hasattr(st.session_state, 'chat'):
-                    response = st.session_state.chat.send_message(prompt)
+                    response = st.session_state.chat.send_message(final_prompt)
                     placeholder.markdown(response.text)
                     
                     st.session_state.history.append({"role": "assistant", "content": response.text})
