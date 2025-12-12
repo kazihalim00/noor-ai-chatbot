@@ -2,8 +2,8 @@
 Project Name: Noor-AI Islamic Assistant
 Author: Kazi Abdul Halim Sunny
 Date: November 2025
-Update: December 2025
-Description: PROFESSIONAL VERSION - Gemini 2.5 Flash + Hybrid RAG + Auto History Limit.
+Update: December 12, 2025
+Description: PROFESSIONAL VERSION - Gemini 2.5 Flash + Green/Gold Theme + FULL Original Instructions.
 """
 
 import streamlit as st
@@ -21,87 +21,86 @@ def setup_page_config():
         layout="centered"
     )
 
-# --- 2. CSS: MINIMALIST & CLEAN (STRICTLY PRESERVED) ---
+# --- 2. CSS: ELEGANT GREEN & GOLD THEME (White Text for Body) ---
 def apply_custom_styles():
     st.markdown("""
         <style>
-        /* Import clean font for straight numbers & clear text */
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
 
-        /* General App Background - Dark but Neutral */
-        .stApp { background-color: #0E1117; color: #E6E6E6; }
+        /* General App Background */
+        .stApp { background-color: #0E1117; color: #E0E0E0; }
         
-        /* Headers - Clean & Simple */
+        /* Headers - Antique Gold */
         h1 { 
-            color: #E6E6E6 !important; 
+            color: #E6C15C !important; 
             font-family: 'Inter', sans-serif; 
             text-align: center; 
-            font-weight: 500; 
-            letter-spacing: 0.5px;
+            font-weight: 300; 
+            letter-spacing: 1px; 
             padding-bottom: 10px;
         }
         .stMarkdown h3 { 
-            color: #A1A1AA !important; /* Neutral Grey */
+            color: #D4AF37 !important; 
             text-align: center; 
             font-weight: 400; 
         }
         
-        /* Sidebar Styling - Minimalist Black */
-        [data-testid="stSidebar"] { background-color: #000000; border-right: 1px solid #27272A; }
+        /* Sidebar Styling */
+        [data-testid="stSidebar"] { background-color: #000000; border-right: 1px solid #222; }
         
         /* Input Field Styling */
         .stTextInput input { 
-            background-color: #18181B !important; /* Zinc-900 */
-            color: #FAFAFA !important; 
-            border: 1px solid #3F3F46; 
-            border-radius: 15px; 
+            background-color: #1E1E1E !important; 
+            color: #E0E0E0 !important; 
+            border: 1px solid #444; 
+            border-radius: 20px; 
             padding-left: 15px; 
-            font-family: 'Inter', sans-serif;
         }
         
         /* --- CHAT INTERFACE STYLING --- */
         
-        /* User Message (Odd) - Transparent/Minimal */
+        /* User Message (Odd) - Clean Grey */
         div[data-testid="stChatMessage"]:nth-of-type(odd) {
-            background-color: transparent !important;
-            border: 1px solid #27272A !important;
-            border-radius: 10px;
+            background-color: #262730 !important;
+            border: 1px solid #3E3E3E !important;
+            border-radius: 12px;
             padding: 15px;
-            margin-bottom: 10px;
-            font-family: 'Inter', sans-serif;
+            margin-bottom: 12px;
         }
 
-        /* AI Message (Even) - SUBTLE GREY BOX (NO HEAVY COLORS) */
+        /* AI Message (Even) - DEEP ISLAMIC GREEN BACKGROUND */
         div[data-testid="stChatMessage"]:nth-of-type(even) {
-            background-color: #1C1C1E !important; /* Very Light Charcoal */
-            border: 1px solid #2C2C2E !important; /* Subtle border */
-            border-left: 3px solid #D4AF37 !important; /* Thin Elegant Gold Accent Line */
-            border-radius: 6px 10px 10px 6px;
-            padding: 20px;
-            margin-bottom: 15px;
+            background-color: #14281D !important; /* Deep Matte Green */
+            border: 1px solid #4A5D23 !important; /* Olive Border */
+            border-left: 4px solid #C5A059 !important; /* Gold Accent Line */
+            border-radius: 8px 12px 12px 8px;
+            padding: 15px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
         
-        /* Text Visibility inside AI Bubble - High Clarity */
+        /* TEXT COLOR FIX: FORCE WHITE FOR GENERAL TEXT */
         div[data-testid="stChatMessage"]:nth-of-type(even) p,
+        div[data-testid="stChatMessage"]:nth-of-type(even) span,
         div[data-testid="stChatMessage"]:nth-of-type(even) div,
         div[data-testid="stChatMessage"]:nth-of-type(even) li {
-             color: #E6E6E6 !important; /* Off-White */
-             line-height: 1.8; 
-             font-family: 'Inter', sans-serif !important; 
-             font-size: 16px;
+             color: #FFFFFF !important; /* Pure White Text */
+             line-height: 1.7;
+             font-family: 'Inter', sans-serif !important;
+             font-weight: 400;
         }
 
-        /* Key Terms - Gold text only here */
+        /* ONLY Key Terms are Gold */
         div[data-testid="stChatMessage"]:nth-of-type(even) strong { 
-            color: #FCD34D !important; /* Soft Gold */
-            font-weight: 600 !important; 
+            color: #FFD700 !important; /* Bright Gold */
+            font-weight: 700 !important; 
         }
 
-        /* Hyperlinks - Subtle Blue */
+        /* Hyperlinks - Cyan/Blue blend */
         div[data-testid="stChatMessage"]:nth-of-type(even) a { 
-            color: #60A5FA !important; /* Soft Blue */
+            color: #80CBC4 !important; 
             text-decoration: none !important; 
-            border-bottom: 1px dotted #60A5FA;
+            border-bottom: 1px dotted #80CBC4;
         }
         
         /* Mobile Responsiveness */
@@ -121,29 +120,23 @@ def configure_api():
     except Exception as e:
         st.error(f"API Connection Failed: {e}")
 
-# --- 4. FIREBASE INITIALIZATION (SMART HYBRID) ---
+# --- 4. FIREBASE INITIALIZATION ---
 def init_firebase():
-    # Check if app is already connected
     if firebase_admin._apps:
         return firestore.client()
 
     try:
-        # 1. Use local 'service_account.json' if available (For Local PC)
         if os.path.exists("service_account.json"):
             cred = credentials.Certificate("service_account.json")
             firebase_admin.initialize_app(cred)
             return firestore.client()
-            
-        # 2. Use 'st.secrets' if running on Cloud
         elif "firebase" in st.secrets:
             firebase_creds = dict(st.secrets["firebase"])
-            # Fix private key format for Streamlit Cloud
             if "private_key" in firebase_creds:
                 firebase_creds["private_key"] = firebase_creds["private_key"].replace('\\n', '\n')
             cred = credentials.Certificate(firebase_creds)
             firebase_admin.initialize_app(cred)
             return firestore.client()
-            
         else:
             return None
     except Exception as e:
@@ -155,25 +148,19 @@ db = init_firebase()
 # --- 5. SMART KNOWLEDGE RETRIEVAL ---
 def get_knowledge_from_firebase(query):
     if not db: return ""
-    
     try:
-        # Fetch documents from 'knowledge_base' collection
         docs = db.collection("knowledge_base").stream()
         context_data = ""
         query_words = query.lower().split()
-        
         found_count = 0
         for doc in docs:
             data = doc.to_dict()
             content = data.get("content", "")
             title = data.get("title", "")
-            
-            # Simple keyword matching logic
             if any(word in content.lower() for word in query_words if len(word) > 3):
                 context_data += f"SOURCE ARTICLE [{title}]:\n{content}\n\n"
                 found_count += 1
-                if found_count >= 2: break # Limit to top 2 relevant articles
-                
+                if found_count >= 2: break 
         return context_data
     except Exception:
         return ""
@@ -189,7 +176,7 @@ def save_chat_to_db(user_msg, ai_msg):
             })
         except: pass
 
-# --- 7. SYSTEM INSTRUCTIONS (STRICTLY PRESERVED) ---
+# --- 7. SYSTEM INSTRUCTIONS (FULL ORIGINAL + SMART TRIGGER) ---
 system_instruction = """
 You are Noor-AI, a sophisticated and caring Islamic companion dedicated to providing accurate knowledge.
 
@@ -197,7 +184,8 @@ You are Noor-AI, a sophisticated and caring Islamic companion dedicated to provi
 
 1. **THEOLOGICAL INTEGRITY (AQEEDAH):**
    - **Creator:** Attribute creation SOLELY to Allah (SWT). Never imply human creation for your essence.
-   - **Development:** If asked about your origin, state: "I was developed and programmed by **Kazi Abdul Halim Sunny**."
+   - **Development:** If asked about your origin/developer, state: "I was developed and programmed by **Kazi Abdul Halim Sunny**."
+   - **Smart Trigger:** If asked "What do you do?" or "Ki koro?", describe your function (teaching Islam). Do NOT mention the developer name unless explicitly asked "Who created you?".
 
 2. **SALAM RESPONSE PROTOCOL:**
    - Upon receiving "Salam" or "Assalamu Alaikum", you MUST respond with the COMPLETE reply: "**Wa 'alaykumu s-salam wa rahmatullahi wa barakatuh**".
@@ -209,7 +197,7 @@ You are Noor-AI, a sophisticated and caring Islamic companion dedicated to provi
      - **Format:** `[Book Name: Number](https://sunnah.com/BOOK_SLUG/NUMBER)`
      - **Example:** **[Sahih al-Bukhari: 1](https://sunnah.com/bukhari:1)**
 
-4. **IDENTITY & BIO (PRESERVE EXACT TEXT):**
+4. **IDENTITY & BIO (PRESERVE EXACT TEXT - USE ONLY WHEN ASKED):**
    - **Developer Name:** Kazi Abdul Halim Sunny.
    - **Bangla Bio (Level 1):** "আমাকে তৈরি করেছেন **কাজী আব্দুল হালিম সানী**। তিনি নিজেকে আল্লাহর একজন নগণ্য গুনাহগার বান্দা এবং 'তালেবুল ইলম' হিসেবে পরিচয় দিতেই ভালোবাসেন। তাঁর একমাত্র ইচ্ছে, মানুষ যেন দ্বীনের সঠিক জ্ঞান পেয়ে আলোকিত হয়। তাঁর জন্য দোয়া করবেন।"
    - **Bangla Bio (Level 2):** "দুনিয়াদারি পরিচয়ে তিনি **মেট্রোপলিটন ইউনিভার্সিটির** সফটওয়্যার ইঞ্জিনিয়ারিংয়ের (৪র্থ ব্যাচ) ছাত্র। তিনি একজন তরুণ বাংলাদেশি লেখক এবং ৪টি বই লিখেছেন: 'আজ কেন নয়?', 'একটুকরো স্বপ্ন', 'অমানিশা', এবং 'প্রিটেন্ড' (তরুণদের সমস্যা নিয়ে লেখা উপন্যাস - যার অনলাইন কপি সবার জন্য ফ্রী)।"
@@ -220,41 +208,36 @@ You are Noor-AI, a sophisticated and caring Islamic companion dedicated to provi
 
 6. **SCHOLARLY REFERENCE PRIORITY:**
    - Prioritize insights from **Ustaz Abu Sa'ada Muhammad Hammad Billaah** & **Esho Din Shikhi**.
-   - If 'SOURCE ARTICLE' is provided in context, use it to answer and mention it.
    - **Visual Emphasis:** Use **Bold** formatting for significant Islamic terminology (e.g., **Tawhid**, **Taqwa**) to render them in **GOLD** color.
 """
 
-# --- 8. SESSION MANAGEMENT (UPDATED: Gemini 2.5 Flash) ---
+# --- 8. SESSION MANAGEMENT (Gemini 2.5 Flash) ---
 def initialize_session():
     if "history" not in st.session_state:
         st.session_state.history = []
         
     try:
         if "model" not in st.session_state:
-            # ✅ UPDATED: Using 'gemini-2.5-flash' for better performance
+            # Using Gemini 2.5 Flash
             st.session_state.model = genai.GenerativeModel("gemini-2.5-flash", system_instruction=system_instruction)
             st.session_state.chat = st.session_state.model.start_chat(history=[])
     except Exception as e:
         st.error(f"System Initialization Failure: {e}")
 
-# --- 9. SIDEBAR INTERFACE ---
+# --- 9. SIDEBAR ---
 def display_sidebar():
     with st.sidebar:
         st.title("🌙 Noor-AI")
         st.markdown("---") 
         st.markdown("**Developer:**")
         st.markdown("### Kazi Abdul Halim Sunny")
-        
         st.markdown("---")
         st.info("Insights derived strictly from the Holy Qur'an & Authentic Sunnah.")
-        st.warning("Disclaimer: For specific Fiqh rulings, kindly consult a qualified local scholar.")
-        
         if st.session_state.history:
             chat_str = "\n".join([f"{m['role']}: {m['content']}" for m in st.session_state.history])
-            st.markdown("---")
             st.download_button("📥 Export Conversation", chat_str, "noor_ai_session.txt")
 
-# --- 10. MAIN APPLICATION LOOP ---
+# --- 10. MAIN APP ---
 def main():
     setup_page_config()
     apply_custom_styles()
@@ -266,82 +249,58 @@ def main():
     st.markdown("### Authentic Guidance from Qur'an & Sunnah")
     st.divider()
 
-    # --- AUTO HISTORY LIMIT (Prevents 429 Errors) ---
-    # Keeps only the last 8 messages to save token limit
+    # --- AUTO HISTORY LIMIT (Keep last 8) ---
     if len(st.session_state.history) > 8:
         st.session_state.history = st.session_state.history[-8:]
 
-    # --- RENDER CHAT HISTORY ---
     for message in st.session_state.history:
         role = message["role"]
         avatar = "👤" if role == "user" else "🎓"
         with st.chat_message(role, avatar=avatar):
             st.markdown(message["content"])
 
-    # --- USER INPUT SECTION ---
     prompt = st.chat_input("Inquire about Islam, History, or Spirituality...")
 
     if prompt:
-        # 1. Capture User Input
         st.session_state.history.append({"role": "user", "content": prompt})
         with st.chat_message("user", avatar="👤"):
             st.markdown(prompt)
 
-        # 2. Generate AI Response
         with st.chat_message("assistant", avatar="🎓"):
             placeholder = st.empty()
             placeholder.markdown("Analyzing sources...") 
             try:
-                # --- A. Check Database (RAG) ---
                 retrieved_context = get_knowledge_from_firebase(prompt)
                 
-                # --- B. Construct Prompt ---
                 if retrieved_context:
-                    # If data found, inject into prompt
-                    final_prompt = f"""
-                    Use the following CONTEXT from our database to answer the user's question.
-                    
-                    CONTEXT:
-                    {retrieved_context}
-                    
-                    USER QUESTION: {prompt}
-                    """
+                    final_prompt = f"CONTEXT:\n{retrieved_context}\n\nUSER QUESTION: {prompt}"
                 else:
-                    # If no data found, use standard prompt
                     final_prompt = prompt
 
-                # --- C. Call AI Model ---
                 if hasattr(st.session_state, 'chat'):
                     try:
-                        # --- FORMAT FIX FOR GOOGLE API ---
-                        # Convert Streamlit history format to Gemini format
+                        # --- FORMAT CONVERSION FOR GEMINI ---
                         gemini_history = []
                         for msg in st.session_state.history:
                             role = "user" if msg["role"] == "user" else "model"
-                            gemini_history.append({
-                                "role": role,
-                                "parts": [msg["content"]]
-                            })
+                            gemini_history.append({"role": role, "parts": [msg["content"]]})
 
-                        # Re-initialize chat with corrected format and history limit
                         st.session_state.chat = st.session_state.model.start_chat(history=gemini_history)
                         
                         response = st.session_state.chat.send_message(final_prompt)
                         placeholder.markdown(response.text)
                         
                         st.session_state.history.append({"role": "assistant", "content": response.text})
-                        
-                        # Log to Database
                         save_chat_to_db(prompt, response.text)
                         
                     except Exception as e:
                         if "429" in str(e):
-                            placeholder.warning("⚠️ High traffic (429). Please wait 30 seconds.")
+                            placeholder.warning("⚠️ High traffic. Please wait 30 seconds.")
                         else:
                             placeholder.error(f"Error: {e}")
-                    
             except Exception as e:
                 placeholder.error(f"Processing Error: {e}")
 
 if __name__ == "__main__":
     main()
+```
