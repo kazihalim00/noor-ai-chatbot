@@ -1,8 +1,9 @@
 """
 Project Name: Noor-AI Islamic Assistant
 Author: Kazi Abdul Halim Sunny
-Date: December 2025
-Description: PROFESSIONAL VERSION - Minimalist UI + Firebase Knowledge Retrieval (RAG).
+Date: November 2025
+Update: December 2025
+Description: PROFESSIONAL VERSION - Gemini 2.5 Flash + Hybrid RAG + Auto History Limit.
 """
 
 import streamlit as st
@@ -151,7 +152,7 @@ def init_firebase():
 
 db = init_firebase()
 
-# --- 5. SMART KNOWLEDGE RETRIEVAL (NEW FEATURE) ---
+# --- 5. SMART KNOWLEDGE RETRIEVAL ---
 def get_knowledge_from_firebase(query):
     if not db: return ""
     
@@ -223,14 +224,15 @@ You are Noor-AI, a sophisticated and caring Islamic companion dedicated to provi
    - **Visual Emphasis:** Use **Bold** formatting for significant Islamic terminology (e.g., **Tawhid**, **Taqwa**) to render them in **GOLD** color.
 """
 
-# --- 8. SESSION MANAGEMENT ---
+# --- 8. SESSION MANAGEMENT (UPDATED: Gemini 2.5 Flash) ---
 def initialize_session():
     if "history" not in st.session_state:
         st.session_state.history = []
         
     try:
         if "model" not in st.session_state:
-            st.session_state.model = genai.GenerativeModel("gemini-flash-latest", system_instruction=system_instruction)
+            # ✅ UPDATED: Using 'gemini-2.5-flash' for better performance
+            st.session_state.model = genai.GenerativeModel("gemini-2.5-flash", system_instruction=system_instruction)
             st.session_state.chat = st.session_state.model.start_chat(history=[])
     except Exception as e:
         st.error(f"System Initialization Failure: {e}")
@@ -263,6 +265,11 @@ def main():
     st.title("Noor-AI: Islamic Companion") 
     st.markdown("### Authentic Guidance from Qur'an & Sunnah")
     st.divider()
+
+    # --- AUTO HISTORY LIMIT (Prevents 429 Errors) ---
+    # Keeps only the last 8 messages to save token limit
+    if len(st.session_state.history) > 8:
+        st.session_state.history = st.session_state.history[-8:]
 
     # --- RENDER CHAT HISTORY ---
     for message in st.session_state.history:
@@ -305,13 +312,33 @@ def main():
 
                 # --- C. Call AI Model ---
                 if hasattr(st.session_state, 'chat'):
-                    response = st.session_state.chat.send_message(final_prompt)
-                    placeholder.markdown(response.text)
-                    
-                    st.session_state.history.append({"role": "assistant", "content": response.text})
-                    
-                    # Log to Database
-                    save_chat_to_db(prompt, response.text)
+                    try:
+                        # --- FORMAT FIX FOR GOOGLE API ---
+                        # Convert Streamlit history format to Gemini format
+                        gemini_history = []
+                        for msg in st.session_state.history:
+                            role = "user" if msg["role"] == "user" else "model"
+                            gemini_history.append({
+                                "role": role,
+                                "parts": [msg["content"]]
+                            })
+
+                        # Re-initialize chat with corrected format and history limit
+                        st.session_state.chat = st.session_state.model.start_chat(history=gemini_history)
+                        
+                        response = st.session_state.chat.send_message(final_prompt)
+                        placeholder.markdown(response.text)
+                        
+                        st.session_state.history.append({"role": "assistant", "content": response.text})
+                        
+                        # Log to Database
+                        save_chat_to_db(prompt, response.text)
+                        
+                    except Exception as e:
+                        if "429" in str(e):
+                            placeholder.warning("⚠️ High traffic (429). Please wait 30 seconds.")
+                        else:
+                            placeholder.error(f"Error: {e}")
                     
             except Exception as e:
                 placeholder.error(f"Processing Error: {e}")
