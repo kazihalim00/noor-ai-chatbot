@@ -3,7 +3,7 @@ Project Name: Noor-AI Islamic Assistant
 Author: Kazi Abdul Halim Sunny
 Date: November 2025
 Update: December 12, 2025
-Description: PROFESSIONAL VERSION - Gemini 2.5 Flash + Green/Gold Theme + FULL Original Instructions.
+Description: PROFESSIONAL VERSION - Gemini 2.5 Flash + Green/Gold Theme + Fixed Salam Color.
 """
 
 import streamlit as st
@@ -21,7 +21,7 @@ def setup_page_config():
         layout="centered"
     )
 
-# --- 2. CSS: ELEGANT GREEN & GOLD THEME (White Text for Body) ---
+# --- 2. CSS: ELEGANT GREEN & GOLD THEME ---
 def apply_custom_styles():
     st.markdown("""
         <style>
@@ -90,7 +90,7 @@ def apply_custom_styles():
              font-weight: 400;
         }
 
-        /* ONLY Key Terms are Gold */
+        /* ONLY Key Terms (Bold) are Gold */
         div[data-testid="stChatMessage"]:nth-of-type(even) strong { 
             color: #FFD700 !important; /* Bright Gold */
             font-weight: 700 !important; 
@@ -176,7 +176,7 @@ def save_chat_to_db(user_msg, ai_msg):
             })
         except: pass
 
-# --- 7. SYSTEM INSTRUCTIONS (FULL ORIGINAL + SMART TRIGGER) ---
+# --- 7. SYSTEM INSTRUCTIONS (Bold removed from Salam to make it White) ---
 system_instruction = """
 You are Noor-AI, a sophisticated and caring Islamic companion dedicated to providing accurate knowledge.
 
@@ -188,8 +188,8 @@ You are Noor-AI, a sophisticated and caring Islamic companion dedicated to provi
    - **Smart Trigger:** If asked "What do you do?" or "Ki koro?", describe your function (teaching Islam). Do NOT mention the developer name unless explicitly asked "Who created you?".
 
 2. **SALAM RESPONSE PROTOCOL:**
-   - Upon receiving "Salam" or "Assalamu Alaikum", you MUST respond with the COMPLETE reply: "**Wa 'alaykumu s-salam wa rahmatullahi wa barakatuh**".
-   - Avoid abbreviated responses.
+   - Upon receiving "Salam" or "Assalamu Alaikum", you MUST respond with the COMPLETE reply: "Wa 'alaykumu s-salam wa rahmatullahi wa barakatuh".
+   - (Note: Reply in plain text so it appears WHITE. Do not use bold/asterisks here).
 
 3. **CITATION & LINKS (MANDATORY FORMAT):**
    - **Quran:** Cite strictly as: **[Surah Name: Ayah](https://quran.com/SURAH_NUMBER/AYAH_NUMBER)**
@@ -208,7 +208,7 @@ You are Noor-AI, a sophisticated and caring Islamic companion dedicated to provi
 
 6. **SCHOLARLY REFERENCE PRIORITY:**
    - Prioritize insights from **Ustaz Abu Sa'ada Muhammad Hammad Billaah** & **Esho Din Shikhi**.
-   - **Visual Emphasis:** Use **Bold** formatting for significant Islamic terminology (e.g., **Tawhid**, **Taqwa**) to render them in **GOLD** color.
+   - **Visual Emphasis:** Use **Bold** formatting ONLY for significant Islamic terminology (e.g., **Tawhid**, **Taqwa**) so they render in **GOLD**. Keep normal sentences in plain text to render WHITE.
 """
 
 # --- 8. SESSION MANAGEMENT (Gemini 2.5 Flash) ---
@@ -224,15 +224,18 @@ def initialize_session():
     except Exception as e:
         st.error(f"System Initialization Failure: {e}")
 
-# --- 9. SIDEBAR ---
+# --- 9. SIDEBAR (ORIGINAL STYLE) ---
 def display_sidebar():
     with st.sidebar:
         st.title("🌙 Noor-AI")
         st.markdown("---") 
         st.markdown("**Developer:**")
         st.markdown("### Kazi Abdul Halim Sunny")
+        
         st.markdown("---")
         st.info("Insights derived strictly from the Holy Qur'an & Authentic Sunnah.")
+        st.warning("Disclaimer: For specific Fiqh rulings, kindly consult a qualified local scholar.")
+        
         if st.session_state.history:
             chat_str = "\n".join([f"{m['role']}: {m['content']}" for m in st.session_state.history])
             st.download_button("📥 Export Conversation", chat_str, "noor_ai_session.txt")
