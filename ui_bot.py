@@ -111,14 +111,18 @@ def apply_custom_styles():
 # --- 3. API CONFIGURATION ---
 def configure_api():
     try:
-        if "GOOGLE_API_KEY" in st.secrets:
-            api_key = st.secrets["GOOGLE_API_KEY"]
-            genai.configure(api_key=api_key)
+        if hasattr(st, "secrets") and "GOOGLE_API_KEYS" in st.secrets:
+            keys_string = st.secrets["GOOGLE_API_KEYS"]
+            api_keys = [key.strip() for key in keys_string.split(",")]
+            
+            
+            selected_key = random.choice(api_keys)
+            genai.configure(api_key=selected_key)
         else:
-            st.error("⚠️ Configuration Error: GOOGLE_API_KEY not found in Secrets.")
-            st.stop()
+        
+            genai.configure(api_key="YOUR_LOCAL_API_KEY_HERE")
     except Exception as e:
-        st.error(f"API Connection Failed: {e}")
+        st.error(f"API Configuration Error: {e}")
 
 # --- 4. FIREBASE INITIALIZATION ---
 def init_firebase():
@@ -286,25 +290,17 @@ def main():
 
                 if hasattr(st.session_state, 'chat'):
                     try:
-                        # --- FORMAT CONVERSION FOR GEMINI ---
-                        gemini_history = []
-                        for msg in st.session_state.history:
-                            role = "user" if msg["role"] == "user" else "model"
-                            gemini_history.append({"role": role, "parts": [msg["content"]]})
-
-                        st.session_state.chat = st.session_state.model.start_chat(history=gemini_history)
-                        
-                        response = st.session_state.chat.send_message(final_prompt)
-                        placeholder.markdown(response.text)
-                        
-                        st.session_state.history.append({"role": "assistant", "content": response.text})
-                        save_chat_to_db(prompt, response.text)
-                        
-                    except Exception as e:
-                        if "429" in str(e):
-                            placeholder.warning("⚠️ High traffic. Please wait 30 seconds.")
-                        else:
-                            placeholder.error(f"Error: {e}")
+                if hasattr(st.session_state, 'chat'):
+                    response = st.session_state.chat.send_message(prompt)
+                    message_placeholder.markdown(response.text)
+                    st.session_state.history.append({"role": "assistant", "content": response.text})
+            except Exception as e:
+               
+                error_msg = str(e).lower()
+                if "429" in error_msg or "quota" in error_msg or "exhausted" in error_msg or "too many requests" in error_msg:
+                    message_placeholder.warning("⏳ **সার্ভারে অনেক চাপ!** বর্তমানে অনেক মানুষ একসাথে ব্যবহার করায় লিমিট ক্রস করেছে। দয়া করে ৩০-৪০ সেকেন্ড অপেক্ষা করে আবার প্রশ্ন করুন।")
+                else:
+                    message_placeholder.error(f"An error occurred: {e}")
             except Exception as e:
                 placeholder.error(f"Processing Error: {e}")
 
