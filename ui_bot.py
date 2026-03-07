@@ -12,6 +12,7 @@ from google.generativeai.types import HarmCategory, HarmBlockThreshold
 import firebase_admin
 from firebase_admin import credentials, firestore
 import os
+import random
 
 # --- 1. SETUP PAGE CONFIGURATION ---
 def setup_page_config():
@@ -114,12 +115,9 @@ def configure_api():
         if hasattr(st, "secrets") and "GOOGLE_API_KEYS" in st.secrets:
             keys_string = st.secrets["GOOGLE_API_KEYS"]
             api_keys = [key.strip() for key in keys_string.split(",")]
-            
-            
             selected_key = random.choice(api_keys)
             genai.configure(api_key=selected_key)
         else:
-        
             genai.configure(api_key="YOUR_LOCAL_API_KEY_HERE")
     except Exception as e:
         st.error(f"API Configuration Error: {e}")
@@ -180,7 +178,7 @@ def save_chat_to_db(user_msg, ai_msg):
             })
         except: pass
 
-# --- 7. SYSTEM INSTRUCTIONS (Bold removed from Salam to make it White) ---
+# --- 7. SYSTEM INSTRUCTIONS ---
 system_instruction = """
 You are Noor-AI, a sophisticated and caring Islamic companion dedicated to providing accurate knowledge.
 
@@ -216,7 +214,7 @@ You are Noor-AI, a sophisticated and caring Islamic companion dedicated to provi
    - NEVER invent your own interpretation, metaphorical meaning, or personal reasoning for any Ayah.
    - Always mention the source of the explanation. 
      - English Example: "According to **Tafsir Ibn Kathir**..."
-     - Bangla Example: "**তাফসীরে ইবনে কাসীর** অনুযায়ী..."
+     - Bangla Example: "**তাফসীরে ইবনে কাসীর** অনুযায়ী..."
 """
 
 # --- 8. SESSION MANAGEMENT (Gemini 2.5 Flash) ---
@@ -226,8 +224,7 @@ def initialize_session():
         
     try:
         if "model" not in st.session_state:
-            # Using Gemini 2.5 Flash
-            st.session_state.model = genai.GenerativeModel("gemini-2.5-flash", system_instruction=system_instruction)
+            st.session_state.model = genai.GenerativeModel("gemini-2.0-flash", system_instruction=system_instruction)
             st.session_state.chat = st.session_state.model.start_chat(history=[])
     except Exception as e:
         st.error(f"System Initialization Failure: {e}")
@@ -260,7 +257,6 @@ def main():
     st.markdown("### Authentic Guidance from Qur'an & Sunnah")
     st.divider()
 
-    # --- AUTO HISTORY LIMIT (Keep last 8) ---
     if len(st.session_state.history) > 8:
         st.session_state.history = st.session_state.history[-8:]
 
@@ -277,7 +273,7 @@ def main():
         with st.chat_message("user", avatar="👤"):
             st.markdown(prompt)
 
-      with st.chat_message("assistant", avatar="🎓"):
+        with st.chat_message("assistant", avatar="🎓"):
             message_placeholder = st.empty()
             message_placeholder.markdown("Analyzing sources...") 
             
@@ -294,10 +290,11 @@ def main():
                         response = st.session_state.chat.send_message(final_prompt)
                         message_placeholder.markdown(response.text)
                         st.session_state.history.append({"role": "assistant", "content": response.text})
+                        save_chat_to_db(prompt, response.text)
                     except Exception as e:
                         error_msg = str(e).lower()
                         if "429" in error_msg or "quota" in error_msg or "exhausted" in error_msg or "too many requests" in error_msg:
-                            message_placeholder.warning("⏳ **সার্ভারে অনেক চাপ!** বর্তমানে অনেক মানুষ একসাথে ব্যবহার করায় লিমিট ক্রস করেছে। দয়া করে ৩০-৪০ সেকেন্ড অপেক্ষা করে আবার প্রশ্ন করুন।")
+                            message_placeholder.warning("⏳ **সার্ভারে অনেক চাপ!** বর্তমানে অনেক মানুষ একসাথে ব্যবহার করায় লিমিট ক্রস করেছে। দয়া করে ৩০-৪০ সেকেন্ড অপেক্ষা করে আবার প্রশ্ন করুন।")
                         else:
                             message_placeholder.error(f"AI Error: {e}")
             except Exception as e:
