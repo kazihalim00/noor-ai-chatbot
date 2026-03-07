@@ -277,9 +277,10 @@ def main():
         with st.chat_message("user", avatar="👤"):
             st.markdown(prompt)
 
-        with st.chat_message("assistant", avatar="🎓"):
-            placeholder = st.empty()
-            placeholder.markdown("Analyzing sources...") 
+      with st.chat_message("assistant", avatar="🎓"):
+            message_placeholder = st.empty()
+            message_placeholder.markdown("Analyzing sources...") 
+            
             try:
                 retrieved_context = get_knowledge_from_firebase(prompt)
                 
@@ -290,19 +291,17 @@ def main():
 
                 if hasattr(st.session_state, 'chat'):
                     try:
-                if hasattr(st.session_state, 'chat'):
-                    response = st.session_state.chat.send_message(prompt)
-                    message_placeholder.markdown(response.text)
-                    st.session_state.history.append({"role": "assistant", "content": response.text})
+                        response = st.session_state.chat.send_message(final_prompt)
+                        message_placeholder.markdown(response.text)
+                        st.session_state.history.append({"role": "assistant", "content": response.text})
+                    except Exception as e:
+                        error_msg = str(e).lower()
+                        if "429" in error_msg or "quota" in error_msg or "exhausted" in error_msg or "too many requests" in error_msg:
+                            message_placeholder.warning("⏳ **সার্ভারে অনেক চাপ!** বর্তমানে অনেক মানুষ একসাথে ব্যবহার করায় লিমিট ক্রস করেছে। দয়া করে ৩০-৪০ সেকেন্ড অপেক্ষা করে আবার প্রশ্ন করুন।")
+                        else:
+                            message_placeholder.error(f"AI Error: {e}")
             except Exception as e:
-               
-                error_msg = str(e).lower()
-                if "429" in error_msg or "quota" in error_msg or "exhausted" in error_msg or "too many requests" in error_msg:
-                    message_placeholder.warning("⏳ **সার্ভারে অনেক চাপ!** বর্তমানে অনেক মানুষ একসাথে ব্যবহার করায় লিমিট ক্রস করেছে। দয়া করে ৩০-৪০ সেকেন্ড অপেক্ষা করে আবার প্রশ্ন করুন।")
-                else:
-                    message_placeholder.error(f"An error occurred: {e}")
-            except Exception as e:
-                placeholder.error(f"Processing Error: {e}")
+                message_placeholder.error(f"Processing Error: {e}")
 
 if __name__ == "__main__":
     main()
