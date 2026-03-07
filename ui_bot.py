@@ -224,7 +224,7 @@ def initialize_session():
         
     try:
         if "model" not in st.session_state:
-            st.session_state.model = genai.GenerativeModel("gemini-2.0-flash", system_instruction=system_instruction)
+            st.session_state.model = genai.GenerativeModel("gemini-2.5-flash", system_instruction=system_instruction)
             st.session_state.chat = st.session_state.model.start_chat(history=[])
     except Exception as e:
         st.error(f"System Initialization Failure: {e}")
