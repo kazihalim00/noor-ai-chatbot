@@ -147,6 +147,31 @@ def init_firebase():
 
 db = init_firebase()
 
+def get_relevant_context(user_prompt):
+    try:
+        docs = db.collection('knowledge_base').stream()
+        relevant_chunks = []
+        prompt_lower = user_prompt.lower()
+        
+        for doc in docs:
+            data = doc.to_dict()
+            tags = data.get('tags', [])
+            
+            for tag in tags:
+                if tag.lower() in prompt_lower:
+                    chunk_info = f"- Information: {data.get('content_chunk')}\n  Source: {data.get('source_text')} ({data.get('reference_link')})"
+                    relevant_chunks.append(chunk_info)
+                    break 
+                    
+        if relevant_chunks:
+            return "CONTEXT:\n" + "\n".join(relevant_chunks) + "\n\n"
+            
+        return "" 
+        
+    except Exception as e:
+        print(f"Error fetching context: {e}")
+        return ""
+
 # --- 5. SMART KNOWLEDGE RETRIEVAL ---
 def get_knowledge_from_firebase(query):
     if not db: return ""
