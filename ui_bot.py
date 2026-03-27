@@ -13,34 +13,53 @@ import firebase_admin
 from firebase_admin import credentials, firestore
 import os
 import random
-import random
 
-def display_daily_reminder():
+def display_daily_reminder_ticker():
     reminders = [
-        "দৃষ্টি অবনত রাখুন: 'মুমিনদেরকে বলুন, তারা যেন তাদের দৃষ্টি নত রাখে এবং তাদের লজ্জাস্থানের হেফাজত করে।' (সূরা আন-নূর: ৩০)",
-        "গীবত থেকে বেঁচে থাকুন: 'তোমাদের কেউ যেন কারও গীবত না করে। তোমাদের কেউ কি তার মৃত ভাইয়ের গোশত খেতে পছন্দ করবে?' (সূরা আল-হুজুরাত: ১২)",
-        "জবান হেফাজত করুন: রাসূলুল্লাহ (সা.) বলেছেন, 'যে ব্যক্তি চুপ থাকে, সে নাজাত পায় বা মুক্তি পায়।' (সুনান আত-তিরমিযী: ২৫০১)",
-        "রাগ নিয়ন্ত্রণ করুন: রাসূল (সা.) বলেছেন, 'প্রকৃত বীর সে নয় যে কুস্তিতে জয়ী হয়, বরং বীর সে, যে রাগের সময় নিজেকে নিয়ন্ত্রণ করতে পারে।' (সহীহ বুখারী: ৬১১৪)",
-        "অহংকার পতনের মূল: 'যার অন্তরে অণু পরিমাণ অহংকার থাকবে, সে জান্নাতে প্রবেশ করবে না।' (সহীহ মুসলিম: ৯১)",
-        "সময়ের কদর করুন: 'দুটি নিয়ামতের বিষয়ে অনেক মানুষ ধোঁকায় পড়ে আছে—সুস্থতা এবং অবসর।' (সহীহ বুখারী: ৬৪১২)",
-        "ধৈর্য ধারণ করুন: 'হে মুমিনগণ! ধৈর্য ও সালাতের মাধ্যমে সাহায্য প্রার্থনা করো। নিশ্চয়ই আল্লাহ ধৈর্যশীলদের সাথে আছেন।' (সূরা আল-বাকারাহ: ১৫৩)",
-        "সাদাকাহ দিন: 'দান-সাদাকাহ সম্পদ কমায় না, আর কেউ ক্ষমা করলে আল্লাহ তার সম্মান কেবল বাড়িয়েই দেন।' (সহীহ মুসলিম: ২৫৮৮)"
+        "✨ দৃষ্টি অবনত রাখুন: 'মুমিনদেরকে বলুন, তারা যেন তাদের দৃষ্টি নত রাখে এবং তাদের লজ্জাস্থানের হেফাজত করে।' (সূরা আন-নূর: ৩০)",
+        "✨ গীবত থেকে বেঁচে থাকুন: 'তোমাদের কেউ যেন কারও গীবত না করে। তোমাদের কেউ কি তার মৃত ভাইয়ের গোশত খেতে পছন্দ করবে?' (সূরা আল-হুজুরাত: ১২)",
+        "✨ জবান হেফাজত করুন: রাসূলুল্লাহ (সা.) বলেছেন, 'যে ব্যক্তি চুপ থাকে, সে নাজাত পায় বা মুক্তি পায়।' (সুনান আত-তিরমিযী: ২৫০১)",
+        "✨ রাগ নিয়ন্ত্রণ করুন: রাসূল (সা.) বলেছেন, 'প্রকৃত বীর সে নয় যে কুস্তিতে জয়ী হয়, বরং বীর সে, যে রাগের সময় নিজেকে নিয়ন্ত্রণ করতে পারে।' (সহীহ বুখারী: ৬১১৪)",
+        "✨ অহংকার পতনের মূল: 'যার অন্তরে অণু পরিমাণ অহংকার থাকবে, সে জান্নাতে প্রবেশ করবে না।' (सहीহ মুসলিম: ৯১)",
+        "✨ সময়ের কদর করুন: 'দুটি নিয়ামতের বিষয়ে অনেক মানুষ ধোঁকায় পড়ে আছে—সুস্থতা এবং অবসর।' (सहीহ বুখারী: ৬৪১২)",
+        "✨ ধৈর্য ধারণ করুন: 'হে মুমিনগণ! ধৈর্য ও সালাতের মাধ্যমে সাহায্য প্রার্থনা করো। নিশ্চয়ই আল্লাহ ধৈর্যশীলদের সাথে আছেন।' (সূরা আল-বাকারাহ: ১৫৩)",
+        "✨ সাদাকাহ দিন: 'দান-সাদাকাহ সম্পদ কমায় না, আর কেউ ক্ষমা করলে আল্লাহ তার সম্মান কেবল বাড়িয়েই দেন।' (सहीহ মুসলিম: ২৫৮৮)"
     ]
-    
+
     daily_quote = random.choice(reminders)
-    
+
     st.markdown(f"""
-        <div style="
-            background-color: rgba(140, 145, 150, 0.12);
-            border-left: 4px solid #C5A059;
-            border-radius: 8px;
-            padding: 15px 20px;
-            margin-top: 10px;
-            margin-bottom: 25px;
-            text-align: center;
-        ">
-            <span style="color: #C5A059; font-weight: 600; font-size: 14px; letter-spacing: 1px;">✨ আজকের রিমাইন্ডার</span><br><br>
-            <span style="color: var(--text-color); font-size: 15px; font-family: 'Inter', sans-serif; line-height: 1.6;">
+        <style>
+            @keyframes marquee {{
+                0%   {{ transform: translate(100%, 0); }}
+                100% {{ transform: translate(-100%, 0); }}
+            }}
+
+            .reminder-ticker-container {{
+                display: block;
+                width: 100%;
+                overflow: hidden;
+                white-space: nowrap;
+                box-sizing: border-box;
+                background-color: rgba(140, 145, 150, 0.12);
+                border-bottom: 2px solid #C5A059;
+                margin-top: -6rem; 
+                margin-bottom: 20px;
+                padding: 5px 0;
+            }}
+
+            .reminder-ticker-content {{
+                display: inline-block;
+                animation: marquee 25s linear infinite; 
+                padding-left: 100%;
+                color: var(--text-color);
+                font-size: 14px;
+                font-family: 'Inter', sans-serif;
+                font-weight: 500;
+            }}
+        </style>
+        <div class="reminder-ticker-container">
+            <span class="reminder-ticker-content">
                 {daily_quote}
             </span>
         </div>
@@ -316,13 +335,13 @@ def display_sidebar():
 def main():
     setup_page_config()
     apply_custom_styles()
+    display_daily_reminder_ticker()
     configure_api()
     initialize_session()
     display_sidebar()
 
     st.title("Noor-AI: Islamic Companion") 
     st.markdown("### Authentic Guidance from Qur'an & Sunnah")
-    display_daily_reminder()
     st.divider()
 
     if len(st.session_state.history) > 8:
