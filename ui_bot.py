@@ -320,10 +320,16 @@ def main():
 
                 if hasattr(st.session_state, 'chat'):
                     try:
-                        response = st.session_state.chat.send_message(final_prompt)
-                        message_placeholder.markdown(response.text)
-                        st.session_state.history.append({"role": "assistant", "content": response.text})
-                        save_chat_to_db(prompt, response.text)
+                        response = st.session_state.chat.send_message(final_prompt, stream=True)
+                        full_response = ""
+                        
+                        for chunk in response:
+                            full_response += chunk.text
+                            message_placeholder.markdown(full_response + " ▌")
+                            
+                        message_placeholder.markdown(full_response)
+                        st.session_state.history.append({"role": "assistant", "content": full_response})
+                        save_chat_to_db(prompt, full_response)
                     except Exception as e:
                         error_msg = str(e).lower()
                         if "429" in error_msg or "quota" in error_msg or "exhausted" in error_msg or "too many requests" in error_msg:
