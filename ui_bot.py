@@ -22,7 +22,7 @@ def setup_page_config():
         layout="centered"
     )
 
-# --- 2. CSS: PROFESSIONAL ADAPTIVE THEME (EYE-FRIENDLY) ---
+# --- 2. CSS: PROFESSIONAL ADAPTIVE THEME (ASH & EYE-FRIENDLY) ---
 def apply_custom_styles():
     st.markdown("""
         <style>
@@ -50,47 +50,46 @@ def apply_custom_styles():
             padding-left: 15px; 
         }
         
-        /* User Message (Odd) - Fully Adaptive */
+        /* User Message (Odd) - Transparent/Adaptive */
         div[data-testid="stChatMessage"]:nth-of-type(odd) {
             background-color: transparent !important; 
-            border: 1px solid rgba(197, 160, 89, 0.4) !important;
+            border: 1px solid rgba(197, 160, 89, 0.3) !important;
             border-radius: 12px;
             padding: 15px;
             margin-bottom: 12px;
         }
 
-        /* AI Message (Even) - SOOTHING FOREST GREEN (Lighter & Eye-Friendly) */
+        /* AI Message (Even) - SOFT ASH / GRAY TINT (Fully Adaptive) */
         div[data-testid="stChatMessage"]:nth-of-type(even) {
-            background-color: #274E37 !important; /* চোখের জন্য আরামদায়ক সফট গ্রিন */
-            border: 1px solid #3E6B4E !important; 
-            border-left: 4px solid #C5A059 !important; 
+            background-color: rgba(128, 130, 135, 0.12) !important; /* হালকা অ্যাশ/ধূসর স্বচ্ছ কালার */
+            border: 1px solid rgba(128, 130, 135, 0.2) !important; 
+            border-left: 4px solid #C5A059 !important; /* গোল্ডেন বর্ডার লাইনটা রেখেছি ব্রান্ডিংয়ের জন্য */
             border-radius: 8px 12px 12px 8px;
             padding: 15px;
             margin-bottom: 12px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05); /* শ্যাডো একদম হালকা করে দিয়েছি */
         }
         
-        /* Force Text Colors inside AI Message to ALWAYS be Soft White */
+        /* Text Colors inside AI Message - MAGIC ADAPTIVE COLOR */
         div[data-testid="stChatMessage"]:nth-of-type(even) p,
         div[data-testid="stChatMessage"]:nth-of-type(even) span,
         div[data-testid="stChatMessage"]:nth-of-type(even) div,
         div[data-testid="stChatMessage"]:nth-of-type(even) li {
-             color: #F8F9FA !important; /* হালকা সাদা, যা চোখে লাগবে না */
+             color: var(--text-color) !important; /* লাইট মোডে কালো, ডার্ক মোডে সাদা হবে অটোমেটিক */
              line-height: 1.7;
              font-family: 'Inter', sans-serif !important;
         }
 
-        /* ONLY Key Terms (Bold) are Gold inside AI Message */
+        /* Key Terms (Bold) inside AI Message - Deep Gold to match both themes */
         div[data-testid="stChatMessage"]:nth-of-type(even) strong { 
-            color: #FFD700 !important; 
+            color: #B8860B !important; 
             font-weight: 700 !important; 
         }
 
-        /* Hyperlinks - Cyan/Blue blend inside AI Message */
+        /* Hyperlinks - Emerald Green blending inside AI Message */
         div[data-testid="stChatMessage"]:nth-of-type(even) a { 
-            color: #80CBC4 !important; 
+            color: #2E8B57 !important; 
             text-decoration: none !important; 
-            border-bottom: 1px dotted #80CBC4;
+            border-bottom: 1px dotted #2E8B57;
         }
         
         /* Mobile Responsiveness */
