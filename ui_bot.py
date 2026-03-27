@@ -28,7 +28,7 @@ def apply_custom_styles():
         <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
 
-        /* Headers - Antique Gold (Works beautifully on both light and dark) */
+        /* Headers - Antique Gold */
         h1 { 
             color: #D4AF37 !important; 
             font-family: 'Inter', sans-serif; 
@@ -43,41 +43,39 @@ def apply_custom_styles():
             font-weight: 500; 
         }
         
-        /* Input Field Styling - Adaptive (Let Streamlit handle the background) */
+        /* Input Field Styling - Adaptive */
         .stTextInput input { 
             border: 1.5px solid #C5A059 !important; 
             border-radius: 20px; 
             padding-left: 15px; 
         }
         
-        /* User Message (Odd) - Fully Adaptive & Clear */
-        /* This will be light gray on light mode and dark gray on dark mode */
+        /* User Message (Odd) - Fully Adaptive */
         div[data-testid="stChatMessage"]:nth-of-type(odd) {
-            background-color: transparent !important; /* Streamlit's native adaptive handling */
-            border: 1px solid rgba(197, 160, 89, 0.3) !important;
+            background-color: transparent !important; 
+            border: 1px solid rgba(197, 160, 89, 0.4) !important;
             border-radius: 12px;
             padding: 15px;
             margin-bottom: 12px;
         }
 
-        /* AI Message (Even) - DEEP ISLAMIC GREEN (Eyes Comfort Fixed) */
-        /* Changed to match the comfortable look of image_8.png, but adaptive tint */
+        /* AI Message (Even) - SOOTHING FOREST GREEN (Lighter & Eye-Friendly) */
         div[data-testid="stChatMessage"]:nth-of-type(even) {
-            background-color: #14281D !important; 
-            border: 1px solid #4A5D23 !important; 
+            background-color: #274E37 !important; /* চোখের জন্য আরামদায়ক সফট গ্রিন */
+            border: 1px solid #3E6B4E !important; 
             border-left: 4px solid #C5A059 !important; 
             border-radius: 8px 12px 12px 8px;
             padding: 15px;
             margin-bottom: 12px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05); /* শ্যাডো একদম হালকা করে দিয়েছি */
         }
         
-        /* Force Text Colors inside AI Message to ALWAYS be Pure White for Readability */
+        /* Force Text Colors inside AI Message to ALWAYS be Soft White */
         div[data-testid="stChatMessage"]:nth-of-type(even) p,
         div[data-testid="stChatMessage"]:nth-of-type(even) span,
         div[data-testid="stChatMessage"]:nth-of-type(even) div,
         div[data-testid="stChatMessage"]:nth-of-type(even) li {
-             color: #FFFFFF !important; 
+             color: #F8F9FA !important; /* হালকা সাদা, যা চোখে লাগবে না */
              line-height: 1.7;
              font-family: 'Inter', sans-serif !important;
         }
