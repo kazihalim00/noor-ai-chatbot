@@ -13,7 +13,39 @@ import firebase_admin
 from firebase_admin import credentials, firestore
 import os
 import random
+import random
 
+def display_daily_reminder():
+    reminders = [
+        "দৃষ্টি অবনত রাখুন: 'মুমিনদেরকে বলুন, তারা যেন তাদের দৃষ্টি নত রাখে এবং তাদের লজ্জাস্থানের হেফাজত করে।' (সূরা আন-নূর: ৩০)",
+        "গীবত থেকে বেঁচে থাকুন: 'তোমাদের কেউ যেন কারও গীবত না করে। তোমাদের কেউ কি তার মৃত ভাইয়ের গোশত খেতে পছন্দ করবে?' (সূরা আল-হুজুরাত: ১২)",
+        "জবান হেফাজত করুন: রাসূলুল্লাহ (সা.) বলেছেন, 'যে ব্যক্তি চুপ থাকে, সে নাজাত পায় বা মুক্তি পায়।' (সুনান আত-তিরমিযী: ২৫০১)",
+        "রাগ নিয়ন্ত্রণ করুন: রাসূল (সা.) বলেছেন, 'প্রকৃত বীর সে নয় যে কুস্তিতে জয়ী হয়, বরং বীর সে, যে রাগের সময় নিজেকে নিয়ন্ত্রণ করতে পারে।' (সহীহ বুখারী: ৬১১৪)",
+        "অহংকার পতনের মূল: 'যার অন্তরে অণু পরিমাণ অহংকার থাকবে, সে জান্নাতে প্রবেশ করবে না।' (সহীহ মুসলিম: ৯১)",
+        "সময়ের কদর করুন: 'দুটি নিয়ামতের বিষয়ে অনেক মানুষ ধোঁকায় পড়ে আছে—সুস্থতা এবং অবসর।' (সহীহ বুখারী: ৬৪১২)",
+        "ধৈর্য ধারণ করুন: 'হে মুমিনগণ! ধৈর্য ও সালাতের মাধ্যমে সাহায্য প্রার্থনা করো। নিশ্চয়ই আল্লাহ ধৈর্যশীলদের সাথে আছেন।' (সূরা আল-বাকারাহ: ১৫৩)",
+        "সাদাকাহ দিন: 'দান-সাদাকাহ সম্পদ কমায় না, আর কেউ ক্ষমা করলে আল্লাহ তার সম্মান কেবল বাড়িয়েই দেন।' (সহীহ মুসলিম: ২৫৮৮)"
+    ]
+    
+    daily_quote = random.choice(reminders)
+    
+    st.markdown(f"""
+        <div style="
+            background-color: rgba(140, 145, 150, 0.12);
+            border-left: 4px solid #C5A059;
+            border-radius: 8px;
+            padding: 15px 20px;
+            margin-top: 10px;
+            margin-bottom: 25px;
+            text-align: center;
+        ">
+            <span style="color: #C5A059; font-weight: 600; font-size: 14px; letter-spacing: 1px;">✨ আজকের রিমাইন্ডার</span><br><br>
+            <span style="color: var(--text-color); font-size: 15px; font-family: 'Inter', sans-serif; line-height: 1.6;">
+                {daily_quote}
+            </span>
+        </div>
+    """, unsafe_allow_html=True)
+    
 # --- 1. SETUP PAGE CONFIGURATION ---
 def setup_page_config():
     st.set_page_config(
@@ -290,6 +322,7 @@ def main():
 
     st.title("Noor-AI: Islamic Companion") 
     st.markdown("### Authentic Guidance from Qur'an & Sunnah")
+    display_daily_reminder()
     st.divider()
 
     if len(st.session_state.history) > 8:
