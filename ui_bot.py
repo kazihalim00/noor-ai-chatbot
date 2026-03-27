@@ -22,7 +22,7 @@ def setup_page_config():
         layout="centered"
     )
 
-# --- 2. CSS: PROFESSIONAL ADAPTIVE THEME (LIGHT & DARK COMPATIBLE) ---
+# --- 2. CSS: PROFESSIONAL ADAPTIVE THEME (EYE-FRIENDLY) ---
 def apply_custom_styles():
     st.markdown("""
         <style>
@@ -50,17 +50,18 @@ def apply_custom_styles():
             padding-left: 15px; 
         }
         
-        /* User Message (Odd) - Soft Gold Tint (Adapts automatically to light/dark themes) */
+        /* User Message (Odd) - Fully Adaptive & Clear */
+        /* This will be light gray on light mode and dark gray on dark mode */
         div[data-testid="stChatMessage"]:nth-of-type(odd) {
-            background-color: rgba(197, 160, 89, 0.08) !important;
+            background-color: transparent !important; /* Streamlit's native adaptive handling */
             border: 1px solid rgba(197, 160, 89, 0.3) !important;
             border-radius: 12px;
             padding: 15px;
             margin-bottom: 12px;
-            color: var(--text-color) !important; /* Streamlit's native adaptive text color */
         }
 
-        /* AI Message (Even) - DEEP ISLAMIC GREEN (Fixed to look great anywhere) */
+        /* AI Message (Even) - DEEP ISLAMIC GREEN (Eyes Comfort Fixed) */
+        /* Changed to match the comfortable look of image_8.png, but adaptive tint */
         div[data-testid="stChatMessage"]:nth-of-type(even) {
             background-color: #14281D !important; 
             border: 1px solid #4A5D23 !important; 
@@ -71,7 +72,7 @@ def apply_custom_styles():
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         
-        /* Force Text Colors inside AI Message to ALWAYS be Pure White */
+        /* Force Text Colors inside AI Message to ALWAYS be Pure White for Readability */
         div[data-testid="stChatMessage"]:nth-of-type(even) p,
         div[data-testid="stChatMessage"]:nth-of-type(even) span,
         div[data-testid="stChatMessage"]:nth-of-type(even) div,
