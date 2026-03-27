@@ -22,82 +22,72 @@ def setup_page_config():
         layout="centered"
     )
 
-# --- 2. CSS: ELEGANT GREEN & GOLD THEME ---
+# --- 2. CSS: PROFESSIONAL ADAPTIVE THEME (LIGHT & DARK COMPATIBLE) ---
 def apply_custom_styles():
     st.markdown("""
         <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
 
-        /* General App Background */
-        .stApp { background-color: #0E1117; color: #E0E0E0; }
-        
-        /* Headers - Antique Gold */
+        /* Headers - Antique Gold (Works beautifully on both light and dark) */
         h1 { 
-            color: #E6C15C !important; 
+            color: #D4AF37 !important; 
             font-family: 'Inter', sans-serif; 
             text-align: center; 
-            font-weight: 300; 
+            font-weight: 600; 
             letter-spacing: 1px; 
             padding-bottom: 10px;
         }
         .stMarkdown h3 { 
-            color: #D4AF37 !important; 
+            color: #C5A059 !important; 
             text-align: center; 
-            font-weight: 400; 
+            font-weight: 500; 
         }
         
-        /* Sidebar Styling */
-        [data-testid="stSidebar"] { background-color: #000000; border-right: 1px solid #222; }
-        
-        /* Input Field Styling */
+        /* Input Field Styling - Adaptive (Let Streamlit handle the background) */
         .stTextInput input { 
-            background-color: #1E1E1E !important; 
-            color: #E0E0E0 !important; 
-            border: 1px solid #444; 
+            border: 1.5px solid #C5A059 !important; 
             border-radius: 20px; 
             padding-left: 15px; 
         }
         
-        /* --- CHAT INTERFACE STYLING --- */
-        
-        /* User Message (Odd) - Clean Grey */
+        /* User Message (Odd) - Soft Gold Tint (Adapts automatically to light/dark themes) */
         div[data-testid="stChatMessage"]:nth-of-type(odd) {
-            background-color: #262730 !important;
-            border: 1px solid #3E3E3E !important;
+            background-color: rgba(197, 160, 89, 0.08) !important;
+            border: 1px solid rgba(197, 160, 89, 0.3) !important;
             border-radius: 12px;
             padding: 15px;
             margin-bottom: 12px;
+            color: var(--text-color) !important; /* Streamlit's native adaptive text color */
         }
 
-        /* AI Message (Even) - DEEP ISLAMIC GREEN BACKGROUND */
+        /* AI Message (Even) - DEEP ISLAMIC GREEN (Fixed to look great anywhere) */
         div[data-testid="stChatMessage"]:nth-of-type(even) {
-            background-color: #14281D !important; /* Deep Matte Green */
-            border: 1px solid #4A5D23 !important; /* Olive Border */
-            border-left: 4px solid #C5A059 !important; /* Gold Accent Line */
+            background-color: #14281D !important; 
+            border: 1px solid #4A5D23 !important; 
+            border-left: 4px solid #C5A059 !important; 
             border-radius: 8px 12px 12px 8px;
             padding: 15px;
             margin-bottom: 12px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         
-        /* TEXT COLOR FIX: FORCE WHITE FOR GENERAL TEXT */
+        /* Force Text Colors inside AI Message to ALWAYS be Pure White */
         div[data-testid="stChatMessage"]:nth-of-type(even) p,
         div[data-testid="stChatMessage"]:nth-of-type(even) span,
         div[data-testid="stChatMessage"]:nth-of-type(even) div,
         div[data-testid="stChatMessage"]:nth-of-type(even) li {
-             color: #FFFFFF !important; /* Pure White Text */
+             color: #FFFFFF !important; 
              line-height: 1.7;
              font-family: 'Inter', sans-serif !important;
-             font-weight: 400;
         }
 
-        /* ONLY Key Terms (Bold) are Gold */
+        /* ONLY Key Terms (Bold) are Gold inside AI Message */
         div[data-testid="stChatMessage"]:nth-of-type(even) strong { 
-            color: #FFD700 !important; /* Bright Gold */
+            color: #FFD700 !important; 
             font-weight: 700 !important; 
         }
 
-        /* Hyperlinks - Cyan/Blue blend */
+        /* Hyperlinks - Cyan/Blue blend inside AI Message */
         div[data-testid="stChatMessage"]:nth-of-type(even) a { 
             color: #80CBC4 !important; 
             text-decoration: none !important; 
