@@ -27,10 +27,10 @@ def display_daily_reminder_ticker():
     ]
 
     items_html = ""
-    total_duration = len(reminders) * 8
+    total_duration = len(reminders) * 10
     
     for i, quote in enumerate(reminders):
-        delay = i * 8
+        delay = i * 10
         items_html += f'<div class="carousel-item" style="animation-delay: {delay}s;">{quote}</div>'
 
     st.markdown(f"""
