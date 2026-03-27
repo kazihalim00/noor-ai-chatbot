@@ -324,10 +324,10 @@ def main():
                         full_response = ""
                         
                         for chunk in response:
-                            full_response += chunk.text
-                            message_placeholder.markdown(full_response + " ▌")
-                            
-                        message_placeholder.markdown(full_response)
+                            if chunk.text:
+                                full_response += chunk.text
+                                message_placeholder.markdown(full_response)
+                                
                         st.session_state.history.append({"role": "assistant", "content": full_response})
                         save_chat_to_db(prompt, full_response)
                     except Exception as e:
