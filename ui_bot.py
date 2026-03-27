@@ -321,13 +321,14 @@ def main():
                 if hasattr(st.session_state, 'chat'):
                     try:
                         response = st.session_state.chat.send_message(final_prompt, stream=True)
-                        full_response = ""
                         
-                        for chunk in response:
-                            if chunk.text:
-                                full_response += chunk.text
-                                message_placeholder.markdown(full_response)
-                                
+                        def stream_data():
+                            for chunk in response:
+                                if chunk.text:
+                                    yield chunk.text
+                                    
+                        full_response = message_placeholder.write_stream(stream_data())
+                        
                         st.session_state.history.append({"role": "assistant", "content": full_response})
                         save_chat_to_db(prompt, full_response)
                     except Exception as e:
