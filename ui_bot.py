@@ -26,43 +26,50 @@ def display_daily_reminder_ticker():
         "✨ সাদাকাহ দিন: 'দান-সাদাকাহ সম্পদ কমায় না, আর কেউ ক্ষমা করলে আল্লাহ তার সম্মান কেবল বাড়িয়েই দেন।' (সহীহ মুসলিম: ২৫৮৮)"
     ]
 
-    daily_quote = random.choice(reminders)
+    items_html = ""
+    total_duration = len(reminders) * 8
+    
+    for i, quote in enumerate(reminders):
+        delay = i * 8
+        items_html += f'<div class="carousel-item" style="animation-delay: {delay}s;">{quote}</div>'
 
     st.markdown(f"""
         <style>
-            @keyframes marquee {{
-                0%   {{ transform: translate(100%, 0); }}
-                100% {{ transform: translate(-100%, 0); }}
-            }}
-
-            .reminder-ticker-container {{
-                display: block;
-                width: 100%;
-                overflow: hidden;
-                white-space: nowrap;
-                box-sizing: border-box;
+            .carousel-wrapper {{
                 background-color: rgba(140, 145, 150, 0.12);
                 border-bottom: 2px solid #C5A059;
                 border-top: 1px solid rgba(197, 160, 89, 0.3);
-                margin-top: 0px; /* এই মার্জিনটা জিরো করে দিয়েছি যাতে স্ক্রিনের বাইরে না যায় */
+                padding: 15px 15px;
                 margin-bottom: 25px;
-                padding: 10px 0;
+                min-height: 90px;
+                position: relative;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                overflow: hidden;
             }}
-
-            .reminder-ticker-content {{
-                display: inline-block;
-                animation: marquee 25s linear infinite; 
-                padding-left: 100%;
+            .carousel-item {{
+                position: absolute;
+                width: 90%;
+                text-align: center;
                 color: var(--text-color);
-                font-size: 15px;
+                font-size: 14px;
                 font-family: 'Inter', sans-serif;
                 font-weight: 500;
+                line-height: 1.6;
+                opacity: 0;
+                animation: carouselFade {total_duration}s infinite;
+            }}
+            @keyframes carouselFade {{
+                0% {{ opacity: 0; transform: translateY(10px); }}
+                3% {{ opacity: 1; transform: translateY(0); }}
+                10% {{ opacity: 1; transform: translateY(0); }}
+                12.5% {{ opacity: 0; transform: translateY(-10px); }}
+                100% {{ opacity: 0; }}
             }}
         </style>
-        <div class="reminder-ticker-container">
-            <span class="reminder-ticker-content">
-                {daily_quote}
-            </span>
+        <div class="carousel-wrapper">
+            {items_html}
         </div>
     """, unsafe_allow_html=True)
     
