@@ -318,7 +318,17 @@ def initialize_session():
         
     try:
         if "model" not in st.session_state:
-            st.session_state.model = genai.GenerativeModel("gemini-2.5-flash", system_instruction=system_instruction)
+            safety_settings = {
+                HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_NONE,
+                HarmCategory.HARM_CATEGORY_HATE_SPEECH: HarmBlockThreshold.BLOCK_NONE,
+                HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: HarmBlockThreshold.BLOCK_NONE,
+                HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_NONE,
+            }
+            st.session_state.model = genai.GenerativeModel(
+                "gemini-2.5-flash", 
+                system_instruction=system_instruction,
+                safety_settings=safety_settings
+            )
             st.session_state.chat = st.session_state.model.start_chat(history=[])
     except Exception as e:
         st.error(f"System Initialization Failure: {e}")
@@ -394,11 +404,19 @@ def main():
                         st.session_state.history.append({"role": "assistant", "content": full_response})
                         save_chat_to_db(prompt, full_response)
                     except Exception as e:
+                        try:
+                            st.session_state.chat.rewind()
+                        except:
+                            pass
+                            
+                        if st.session_state.history and st.session_state.history[-1]["role"] == "user":
+                            st.session_state.history.pop()
+                            
                         error_msg = str(e).lower()
                         if "429" in error_msg or "quota" in error_msg or "exhausted" in error_msg or "too many requests" in error_msg:
-                            message_placeholder.warning("⏳ **সার্ভারে অনেক চাপ!** বর্তমানে অনেক মানুষ একসাথে ব্যবহার করায় লিমিট ক্রস করেছে। দয়া করে ৩০-৪০ সেকেন্ড অপেক্ষা করে আবার প্রশ্ন করুন।")
+                            message_placeholder.warning("⏳ সার্ভারে অনেক চাপ! দয়া করে একটু অপেক্ষা করে আবার প্রশ্ন করুন।\n\n**Server Overloaded!** Please wait a moment and try again.")
                         else:
-                            message_placeholder.error(f"AI Error: {e}")
+                            message_placeholder.error("⚠️ নেটওয়ার্ক সমস্যার কারণে উত্তরটি জেনারেট হতে পারেনি। অনুগ্রহ করে পেজটি রিলোড (Refresh) করে আবার চেষ্টা করুন।\n\n**Network Error!** Unable to generate response. Please refresh the page and try again.")
             except Exception as e:
                 message_placeholder.error(f"Processing Error: {e}")
 
