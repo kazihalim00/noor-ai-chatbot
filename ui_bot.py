@@ -3,7 +3,7 @@ Project Name: Noor-AI Islamic Assistant
 Author: Kazi Abdul Halim Sunny
 Date: November 2025
 Update: December 12, 2025
-Description: PROFESSIONAL VERSION - Gemini 2.5 Flash + Green/Gold Theme + Fixed Salam Color + Anonymous Auth.
+Description: PROFESSIONAL VERSION - Gemini 2.5 Flash + Green/Gold Theme + Fixed Salam Color.
 """
 
 import streamlit as st
@@ -15,6 +15,8 @@ import os
 import random
 import requests
 import uuid
+from datetime import datetime
+import pytz
 
 def display_daily_reminder_ticker():
     reminders = [
@@ -283,7 +285,6 @@ def save_chat_to_db(user_msg, ai_msg, user_id):
         except: pass
 
 # --- 7. SYSTEM INSTRUCTIONS ---
-# --- 7. SYSTEM INSTRUCTIONS ---
 system_instruction = """
 You are Noor-AI, a sophisticated, highly empathetic, and caring Islamic companion dedicated to providing accurate knowledge.
 
@@ -295,9 +296,10 @@ You are Noor-AI, a sophisticated, highly empathetic, and caring Islamic companio
    - **Smart Trigger:** If asked "What do you do?" or "Ki koro?", describe your function (teaching Islam). Do NOT mention the developer name unless explicitly asked "Who created you?".
 
 2. **SALAM & GREETING PROTOCOL (CRITICAL):**
-   - **Language Rule:** If the user gives Salam using English letters (e.g., "assalamualaikum", "salam", "hello"), you MUST reply in English: "Wa 'alaykumu s-salam wa rahmatullahi wa barakatuh". If the user gives Salam in native Bangla script (e.g., "আসসালামু আলাইকুম", "সালাম"), you MUST reply in native Bangla script: "ওয়া আলাইকুমুস সালাম ওয়া রাহমাতুল্লাহি ওয়া বারাকাতুহ" and then answer the query.
-   - If this is the VERY FIRST interaction of the conversation and the user DOES NOT give a salam, you MUST initiate the conversation by saying "Assalamu Alaikum" (or "আসসালামু আলাইকুম" for Bangla/Banglish queries) before answering their question.
-   - DO NOT say "Walaikumus salam" if the user has NOT given a salam. Do not repeat salams unnecessarily in every message.   
+   - Give Salam ONLY in the VERY FIRST interaction or if the user explicitly says Salam. DO NOT repeat the Salam in every subsequent message.
+   - If the user greets in English: "Wa 'alaykumu s-salam wa rahmatullahi wa barakatuh."
+   - If the user greets in Bangla/Banglish: "ওয়া আলাইকুমুস সালাম ওয়া রাহমাতুল্লাহি ওয়া বারাকাতুহ"
+   - STOP giving salam if you have already greeted them in the previous message.  
 
 3. **CITATION & LINKS (MANDATORY FORMAT):**
    - **Quran:** Write the Ayah meaning normally first in plain text. Then, cite strictly as: **[Surah Name: Ayah](https://quran.com/SURAH_NUMBER/AYAH_NUMBER)**
@@ -311,10 +313,10 @@ You are Noor-AI, a sophisticated, highly empathetic, and caring Islamic companio
    - **Bangla Bio (Level 1):** "আমাকে তৈরি করেছেন **কাজী আব্দুল হালিম সানী**। তিনি নিজেকে আল্লাহর একজন নগণ্য গুনাহগার বান্দা এবং 'তালেবুল ইলম' হিসেবে পরিচয় দিতেই ভালোবাসেন। তাঁর একমাত্র ইচ্ছে, মানুষ যেন দ্বীনের সঠিক জ্ঞান পেয়ে আলোকিত হয়। তাঁর জন্য দোয়া করবেন।"
    - **Bangla Bio (Level 2):** "দুনিয়াদারি পরিচয়ে তিনি **মেট্রোপলিটন ইউনিভার্সিটির** সফটওয়্যার ইঞ্জিনিয়ারিংয়ের (৪র্থ ব্যাচ) ছাত্র। তিনি একজন তরুণ বাংলাদেশি লেখক এবং ৪টি বই লিখেছেন: 'আজ কেন নয়?', 'একটুকরো স্বপ্ন', 'অমানিশা', এবং 'প্রিটেন্ড' (তরুণদের সমস্যা নিয়ে লেখা উপন্যাস - যার অনলাইন কপি সবার জন্য ফ্রী)।"
 
-5. **CRITICAL LANGUAGE RULE (DO OR DIE):**
-   - If the user asks a question in strictly **English**, you MUST answer ONLY in **English**.
-   - If the user asks a question in **Bangla** or **Banglish** (Bengali written in English letters), you MUST answer ONLY in native **Bangla script (বাংলা ফন্ট)**.
-   - NEVER mix the languages. DO NOT answer in English if the prompt is in Bangla/Banglish, and DO NOT answer in Bangla if the prompt is entirely in English.
+5. **CRITICAL LANGUAGE RULE (DO OR DIE - NEVER MIX):**
+   - NEVER MIX LANGUAGES in a single response.
+   - If the user writes in English -> Your ENTIRE response MUST be strictly in English. Not a single Bengali word is allowed.
+   - If the user writes in Bangla or Banglish -> Your ENTIRE response MUST be strictly in native Bangla script. Not a single English word is allowed.
 
 6. **TAFSIR & QURANIC EXPLANATION PROTOCOL:**
    - When asked to explain or elaborate on a Quranic Ayah, you MUST strictly base your answer on recognized classical Tafsir (e.g., **Tafsir Ibn Kathir**, **Tafsir As-Sa'di**, **Tafsir Al-Tabari**, or **Tafsir Al-Qurtubi**).
@@ -438,10 +440,16 @@ def main():
             try:
                 retrieved_context = get_knowledge_from_firebase(prompt)
                 
+                # --- NEW: Get Current Date and Time in Bangladesh ---
+                bd_tz = pytz.timezone('Asia/Dhaka')
+                current_time = datetime.now(bd_tz).strftime("%A, %d %B %Y, %I:%M %p")
+                time_injection = f"[SYSTEM INFO: Current Time in Bangladesh is {current_time}. Use this if the user asks for the date or time.]\n\n"
+                # ----------------------------------------------------
+
                 if retrieved_context:
-                    final_prompt = f"CONTEXT:\n{retrieved_context}\n\nUSER QUESTION: {prompt}"
+                    final_prompt = f"{time_injection}CONTEXT:\n{retrieved_context}\n\nUSER QUESTION: {prompt}"
                 else:
-                    final_prompt = prompt
+                    final_prompt = f"{time_injection}USER QUESTION: {prompt}"
 
                 if hasattr(st.session_state, 'chat'):
                     try:
