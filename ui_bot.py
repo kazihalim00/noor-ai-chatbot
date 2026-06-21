@@ -440,10 +440,26 @@ def main():
             try:
                 retrieved_context = get_knowledge_from_firebase(prompt)
                 
-                # --- NEW: Get Current Date and Time in Bangladesh ---
+                # --- NEW: Get Current Date, Time, and Exact Hijri Date ---
                 bd_tz = pytz.timezone('Asia/Dhaka')
-                current_time = datetime.now(bd_tz).strftime("%A, %d %B %Y, %I:%M %p")
-                time_injection = f"[SYSTEM INFO: Current Time in Bangladesh is {current_time}. Use this if the user asks for the date or time.]\n\n"
+                now = datetime.now(bd_tz)
+                current_time = now.strftime("%A, %d %B %Y, %I:%M %p")
+                
+                hijri_info = ""
+                try:
+                    date_str = now.strftime("%d-%m-%Y")
+                    # Fetching exact Hijri date from Aladhan API
+                    res = requests.get(f"http://api.aladhan.com/v1/gToH?date={date_str}", timeout=3)
+                    if res.status_code == 200:
+                        h_data = res.json()["data"]["hijri"]
+                        h_day = h_data["day"]
+                        h_month = h_data["month"]["en"]
+                        h_year = h_data["year"]
+                        hijri_info = f" and the exact Arabic (Hijri) date today is {h_day} {h_month} {h_year} AH"
+                except Exception as e:
+                    print("Hijri API Error:", e)
+
+                time_injection = f"[SYSTEM INFO: Current Time in Bangladesh is {current_time}{hijri_info}. If the user asks for the date, time, or Arabic/Hijri date, strictly answer using ONLY this provided info. NEVER guess the Hijri date yourself.]\n\n"
                 # ----------------------------------------------------
 
                 if retrieved_context:
