@@ -3,7 +3,7 @@ Project Name: Noor-AI Islamic Assistant
 Author: Kazi Abdul Halim Sunny
 Date: November 2025
 Update: December 12, 2025
-Description: PROFESSIONAL VERSION - Gemini 2.5 Flash + Green/Gold Theme + Fixed Salam Color.
+Description: PROFESSIONAL VERSION - Gemini 2.5 Flash + Green/Gold Theme + Fixed Salam Color + Memory.
 """
 
 import streamlit as st
@@ -272,7 +272,7 @@ def get_knowledge_from_firebase(query):
     except Exception:
         return ""
 
-# --- 6. DATA LOGGING ---
+# --- 6. DATA LOGGING & MEMORY RETRIEVAL ---
 def save_chat_to_db(user_msg, ai_msg, user_id):
     if db:
         try:
@@ -283,6 +283,26 @@ def save_chat_to_db(user_msg, ai_msg, user_id):
                 "timestamp": firestore.SERVER_TIMESTAMP
             })
         except: pass
+
+def get_past_memory_from_db(uid):
+    """Fetches the user's past chats from Firebase to serve as memory"""
+    if not db or not uid: return []
+    try:
+        docs = db.collection("chats").where("uid", "==", uid).stream()
+        chats = []
+        for doc in docs:
+            data = doc.to_dict()
+            if "timestamp" in data and data["timestamp"]:
+                chats.append(data)
+        
+        # Sort in Python by timestamp to maintain chronological order
+        chats.sort(key=lambda x: x["timestamp"])
+        
+        # Return the last 5 interactions (to keep context light but effective)
+        return chats[-5:]
+    except Exception as e:
+        print("Memory Load Error:", e)
+        return []
 
 # --- 7. SYSTEM INSTRUCTIONS ---
 system_instruction = """
@@ -364,9 +384,24 @@ You are Noor-AI, a sophisticated, highly empathetic, and caring Islamic companio
 """
 
 # --- 8. SESSION MANAGEMENT (Gemini 2.5 Flash) ---
-def initialize_session():
+def initialize_session(user_uid):
     if "history" not in st.session_state:
         st.session_state.history = []
+        
+        # --- NEW: Fetch Past Memory into Current Session ---
+        past_db_chats = get_past_memory_from_db(user_uid)
+        gemini_history = []
+        
+        for chat in past_db_chats:
+            if "user" in chat and chat["user"]:
+                st.session_state.history.append({"role": "user", "content": chat["user"]})
+                gemini_history.append({"role": "user", "parts": [chat["user"]]})
+            if "ai" in chat and chat["ai"]:
+                st.session_state.history.append({"role": "assistant", "content": chat["ai"]})
+                gemini_history.append({"role": "model", "parts": [chat["ai"]]})
+                
+        st.session_state.gemini_history = gemini_history
+        # ---------------------------------------------------
         
     try:
         if "model" not in st.session_state:
@@ -381,7 +416,8 @@ def initialize_session():
                 system_instruction=system_instruction,
                 safety_settings=safety_settings
             )
-            st.session_state.chat = st.session_state.model.start_chat(history=[])
+            # Start Chat WITH the fetched history
+            st.session_state.chat = st.session_state.model.start_chat(history=st.session_state.get("gemini_history", []))
     except Exception as e:
         st.error(f"System Initialization Failure: {e}")
 
@@ -407,18 +443,21 @@ def main():
     apply_custom_styles()
     display_daily_reminder_ticker()
     configure_api()
-    initialize_session()
-    display_sidebar()
     
-    # Get the Anonymous UID for this session
+    # Get the Anonymous UID for this session FIRST
     user_uid = get_anonymous_uid()
+    
+    # Initialize session WITH the user_uid so it can fetch memory
+    initialize_session(user_uid)
+    display_sidebar()
 
     st.title("Noor-AI: Islamic Companion") 
     st.markdown("### Authentic Guidance from Qur'an & Sunnah")
     st.divider()
 
-    if len(st.session_state.history) > 8:
-        st.session_state.history = st.session_state.history[-8:]
+    # --- UPDATED: Allow more history on screen so past chats don't disappear instantly ---
+    if len(st.session_state.history) > 20:
+        st.session_state.history = st.session_state.history[-20:]
 
     for message in st.session_state.history:
         role = message["role"]
@@ -440,7 +479,7 @@ def main():
             try:
                 retrieved_context = get_knowledge_from_firebase(prompt)
                 
-                # --- NEW: Get Current Date, Time, and Exact Hijri Date ---
+                # --- Get Current Date, Time, and Exact Hijri Date ---
                 bd_tz = pytz.timezone('Asia/Dhaka')
                 now = datetime.now(bd_tz)
                 current_time = now.strftime("%A, %d %B %Y, %I:%M %p")
