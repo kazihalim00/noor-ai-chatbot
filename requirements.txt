@@ -2,3 +2,4 @@ streamlit==1.39.0
 google-generativeai
 firebase-admin
 requests
+pytz
