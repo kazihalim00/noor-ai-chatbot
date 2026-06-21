@@ -3,7 +3,7 @@ Project Name: Noor-AI Islamic Assistant
 Author: Kazi Abdul Halim Sunny
 Date: November 2025
 Update: December 12, 2025
-Description: PROFESSIONAL VERSION - Gemini 2.5 Flash + Green/Gold Theme + Fixed Salam Color.
+Description: PROFESSIONAL VERSION - Gemini 2.5 Flash + Green/Gold Theme + Fixed Salam Color + Anonymous Auth.
 """
 
 import streamlit as st
@@ -13,17 +13,19 @@ import firebase_admin
 from firebase_admin import credentials, firestore
 import os
 import random
+import requests
+import uuid
 
 def display_daily_reminder_ticker():
     reminders = [
         "✨ দৃষ্টি অবনত রাখুন: 'মুমিনদেরকে বলুন, তারা যেন তাদের দৃষ্টি নত রাখে এবং তাদের লজ্জাস্থানের হেফাজত করে।' (সূরা আন-নূর: ৩০)",
-        "✨ গীবত থেকে বেঁচে থাকুন: 'তোমাদের কেউ যেন কারও গীবত না করে। তোমাদের কেউ কি তার মৃত ভাইয়ের গোশত খেতে পছন্দ করবে?' (সূরা আল-হুজুরাত: ১২)",
-        "✨ জবান হেফাজত করুন: রাসূলুল্লাহ (সা.) বলেছেন, 'যে ব্যক্তি চুপ থাকে, সে নাজাত পায় বা মুক্তি পায়।' (সুনান আত-তিরমিযী: ২৫০১)",
-        "✨ রাগ নিয়ন্ত্রণ করুন: রাসূল (সা.) বলেছেন, 'প্রকৃত বীর সে নয় যে কুস্তিতে জয়ী হয়, বরং বীর সে, যে রাগের সময় নিজেকে নিয়ন্ত্রণ করতে পারে।' (সহীহ বুখারী: ৬১১৪)",
+        "✨ গীবত থেকে বেঁচে থাকুন: 'তোমাদের কেউ যেন কারও গীবত না করে। তোমাদের কেউ কি তার মৃত ভাইয়ের গোশত খেতে পছন্দ করবে?' (সূরা আল-হুজুরাত: ১২)",
+        "✨ জবান হেফাজত করুন: রাসূলুল্লাহ (সা.) বলেছেন, 'যে ব্যক্তি চুপ থাকে, সে নাজাত পায় বা মুক্তি পায়।' (সুনান আত-তিরমিযী: ২৫০১)",
+        "✨ রাগ নিয়ন্ত্রণ করুন: রাসূল (সা.) বলেছেন, 'প্রকৃত বীর সে নয় যে কুস্তিতে জয়ী হয়, বরং বীর সে, যে রাগের সময় নিজেকে নিয়ন্ত্রণ করতে পারে।' (সহীহ বুখারী: ৬১১৪)",
         "✨ অহংকার পতনের মূল: 'যার অন্তরে অণু পরিমাণ অহংকার থাকবে, সে জান্নাতে প্রবেশ করবে না।' (সহীহ মুসলিম: ৯১)",
-        "✨ সময়ের কদর করুন: 'দুটি নিয়ামতের বিষয়ে অনেক মানুষ ধোঁকায় পড়ে আছে—সুস্থতা এবং অবসর।' (সহীহ বুখারী: ৬৪১২)",
-        "✨ ধৈর্য ধারণ করুন: 'হে মুমিনগণ! ধৈর্য ও সালাতের মাধ্যমে সাহায্য প্রার্থনা করো। নিশ্চয়ই আল্লাহ ধৈর্যশীলদের সাথে আছেন।' (সূরা আল-বাকারাহ: ১৫৩)",
-        "✨ সাদাকাহ দিন: 'দান-সাদাকাহ সম্পদ কমায় না, আর কেউ ক্ষমা করলে আল্লাহ তার সম্মান কেবল বাড়িয়েই দেন।' (সহীহ মুসলিম: ২৫৮৮)"
+        "✨ সময়ের কদর করুন: 'দুটি নিয়ামতের বিষয়ে অনেক মানুষ ধোঁকায় পড়ে আছে—সুস্থতা এবং অবসর।' (সহীহ বুখারী: ৬৪১২)",
+        "✨ ধৈর্য ধারণ করুন: 'হে মুমিনগণ! ধৈর্য ও সালাতের মাধ্যমে সাহায্য প্রার্থনা করো। নিশ্চয়ই আল্লাহ ধৈর্যশীলদের সাথে আছেন।' (সূরা আল-বাকারাহ: ১৫৩)",
+        "✨ সাদাকাহ দিন: 'দান-সাদাকাহ সম্পদ কমায় না, আর কেউ ক্ষমা করলে আল্লাহ তার সম্মান কেবল বাড়িয়েই দেন।' (সহীহ মুসলিম: ২৫৮৮)"
     ]
 
     items_html = ""
@@ -120,8 +122,8 @@ def apply_custom_styles():
 
         /* AI Message (Even) - ENHANCED ASH TINT (Perfect for Dark Mode) */
         div[data-testid="stChatMessage"]:nth-of-type(even) {
-            background-color: rgba(140, 145, 150, 0.22) !important; /* অপাসিটি বাড়িয়ে ডার্ক মোডের জন্য ভিজিবল করা হয়েছে */
-            border: 1px solid rgba(140, 145, 150, 0.4) !important; /* বর্ডারটা একটু স্পষ্ট করা হয়েছে */
+            background-color: rgba(140, 145, 150, 0.22) !important; 
+            border: 1px solid rgba(140, 145, 150, 0.4) !important; 
             border-left: 4px solid #C5A059 !important; 
             border-radius: 8px 12px 12px 8px;
             padding: 15px;
@@ -170,7 +172,7 @@ def configure_api():
     except Exception as e:
         st.error(f"API Configuration Error: {e}")
 
-# --- 4. FIREBASE INITIALIZATION ---
+# --- 4. FIREBASE INITIALIZATION & ANONYMOUS AUTH ---
 def init_firebase():
     if firebase_admin._apps:
         return firestore.client()
@@ -194,6 +196,32 @@ def init_firebase():
         return None
 
 db = init_firebase()
+
+def get_anonymous_uid():
+    """Generates or retrieves an Anonymous Firebase UID for the session"""
+    if "user_uid" in st.session_state:
+        return st.session_state.user_uid
+
+    # Try to use Firebase REST API for Anonymous Auth if Web API Key is available
+    api_key = ""
+    if hasattr(st, "secrets") and "FIREBASE_WEB_API_KEY" in st.secrets:
+        api_key = st.secrets["FIREBASE_WEB_API_KEY"]
+
+    if api_key:
+        try:
+            url = f"https://identitytoolkit.googleapis.com/v1/accounts:signUp?key={api_key}"
+            payload = {"returnSecureToken": True}
+            response = requests.post(url, json=payload)
+            response.raise_for_status()
+            data = response.json()
+            st.session_state.user_uid = data.get("localId")
+            return st.session_state.user_uid
+        except Exception as e:
+            print(f"Auth Error: {e}")
+    
+    # Fallback: Generate a random UUID if API key is missing or request fails
+    st.session_state.user_uid = "anon_" + str(uuid.uuid4())
+    return st.session_state.user_uid
 
 @st.cache_data(ttl=3600)
 def load_knowledge_base():
@@ -243,12 +271,13 @@ def get_knowledge_from_firebase(query):
         return ""
 
 # --- 6. DATA LOGGING ---
-def save_chat_to_db(user_msg, ai_msg):
+def save_chat_to_db(user_msg, ai_msg, user_id):
     if db:
         try:
             db.collection("chats").add({
                 "user": user_msg,
                 "ai": ai_msg,
+                "uid": user_id,
                 "timestamp": firestore.SERVER_TIMESTAMP
             })
         except: pass
@@ -265,7 +294,7 @@ You are Noor-AI, a sophisticated, highly empathetic, and caring Islamic companio
    - **Smart Trigger:** If asked "What do you do?" or "Ki koro?", describe your function (teaching Islam). Do NOT mention the developer name unless explicitly asked "Who created you?".
 
 2. **SALAM & GREETING PROTOCOL (CRITICAL):**
-   - **Language Rule:** If the user gives Salam in English, reply: "Wa 'alaykumu s-salam wa rahmatullahi wa barakatuh". If the user gives Salam in Bangla OR Banglish (e.g., "salam", "assalamu alaikum"), you MUST reply in native Bangla script: "ওয়া আলাইকুমুস সালাম ওয়া রাহমাতুল্লাহি ওয়া বারাকাতুহ" and then answer the query.
+   - **Language Rule:** If the user gives Salam in English, reply: "Wa 'alaykumu s-salam wa rahmatullahi wa barakatuh". If the user gives Salam in Bangla OR Banglish (e.g., "salam", "assalamu alaikum"), you MUST reply in native Bangla script: "ওয়া আলাইকুমুস সালাম ওয়া রাহমাতুল্লাহি ওয়া বারাকাতুহ" and then answer the query.
    - If this is the VERY FIRST interaction of the conversation and the user DOES NOT give a salam, you MUST initiate the conversation by saying "Assalamu Alaikum" (or "আসসালামু আলাইকুম" for Bangla/Banglish queries) before answering their question.
    - DO NOT say "Walaikumus salam" if the user has NOT given a salam. Do not repeat salams unnecessarily in every message.   
 
@@ -281,10 +310,10 @@ You are Noor-AI, a sophisticated, highly empathetic, and caring Islamic companio
    - **Bangla Bio (Level 1):** "আমাকে তৈরি করেছেন **কাজী আব্দুল হালিম সানী**। তিনি নিজেকে আল্লাহর একজন নগণ্য গুনাহগার বান্দা এবং 'তালেবুল ইলম' হিসেবে পরিচয় দিতেই ভালোবাসেন। তাঁর একমাত্র ইচ্ছে, মানুষ যেন দ্বীনের সঠিক জ্ঞান পেয়ে আলোকিত হয়। তাঁর জন্য দোয়া করবেন।"
    - **Bangla Bio (Level 2):** "দুনিয়াদারি পরিচয়ে তিনি **মেট্রোপলিটন ইউনিভার্সিটির** সফটওয়্যার ইঞ্জিনিয়ারিংয়ের (৪র্থ ব্যাচ) ছাত্র। তিনি একজন তরুণ বাংলাদেশি লেখক এবং ৪টি বই লিখেছেন: 'আজ কেন নয়?', 'একটুকরো স্বপ্ন', 'অমানিশা', এবং 'প্রিটেন্ড' (তরুণদের সমস্যা নিয়ে লেখা উপন্যাস - যার অনলাইন কপি সবার জন্য ফ্রী)।"
 
-5. **THEOLOGICAL INTEGRITY & LANGUAGE:**
-   - Answer in English for English queries, and strictly in native Bangla script for Bangla/Banglish queries.
-   - Base your answers strictly on the Quran and authentic Sunnah.
-   - **Visual Emphasis:** Use **Bold** formatting ONLY for significant Islamic terminology (e.g., **Tawhid**, **Taqwa**) so they render in **GOLD**. Keep normal sentences in plain text to render WHITE.
+5. **CRITICAL LANGUAGE RULE (DO OR DIE):**
+   - If the user asks a question in strictly **English**, you MUST answer ONLY in **English**.
+   - If the user asks a question in **Bangla** or **Banglish** (Bengali written in English letters), you MUST answer ONLY in native **Bangla script (বাংলা ফন্ট)**.
+   - NEVER mix the languages. DO NOT answer in English if the prompt is in Bangla/Banglish, and DO NOT answer in Bangla if the prompt is entirely in English.
 
 6. **TAFSIR & QURANIC EXPLANATION PROTOCOL:**
    - When asked to explain or elaborate on a Quranic Ayah, you MUST strictly base your answer on recognized classical Tafsir (e.g., **Tafsir Ibn Kathir**, **Tafsir As-Sa'di**, **Tafsir Al-Tabari**, or **Tafsir Al-Qurtubi**).
@@ -309,6 +338,11 @@ You are Noor-AI, a sophisticated, highly empathetic, and caring Islamic companio
 9. **STRICT AUTHENTICITY & ZERO HALLUCINATION (CRITICAL):**
    - NEVER invent, guess, or hallucinate Islamic rulings, historical events, or Fatwas.
    - **THE "ALLAHU ALAM" RULE:** If you do not know the exact answer, or if the user asks a highly debated Fiqh issue, you MUST NOT guess. Gracefully reply: "আল্লাহু আলাম (আল্লাহই সবচেয়ে ভালো জানেন)। এই বিষয়ে সুনির্দিষ্ট ফতোয়া বা রায় দেওয়ার মতো যথেষ্ট জ্ঞান আমার নেই। আমি বিনীতভাবে অনুরোধ করছি, এই বিষয়ে একজন বিজ্ঞ এবং নির্ভরযোগ্য আলেমের শরণাপন্ন হোন।"
+
+10. **OBSCENITY & SENSITIVE ISSUES PROTOCOL (DO OR DIE):**
+    - If a user asks a question related to "oslilota" (obscenity, immorality, pornography, masturbation, or any sexually sensitive/struggling topic), DO NOT immediately provide a generic Islamic ruling, fatwa, or verse.
+    - FIRST, you MUST deeply and empathetically inquire about their personal situation. Ask them specifically what they are going through, how long it has been happening, how it is affecting their mental state, and what their exact struggles are.
+    - ONLY AFTER they reply and share their personal context and pain, you may provide the appropriate Islamic guidance, comforting words, and solutions based on the Quran and Sunnah.
 """
 
 # --- 8. SESSION MANAGEMENT (Gemini 2.5 Flash) ---
@@ -357,6 +391,9 @@ def main():
     configure_api()
     initialize_session()
     display_sidebar()
+    
+    # Get the Anonymous UID for this session
+    user_uid = get_anonymous_uid()
 
     st.title("Noor-AI: Islamic Companion") 
     st.markdown("### Authentic Guidance from Qur'an & Sunnah")
@@ -402,7 +439,10 @@ def main():
                         full_response = message_placeholder.write_stream(stream_data())
                         
                         st.session_state.history.append({"role": "assistant", "content": full_response})
-                        save_chat_to_db(prompt, full_response)
+                        
+                        # Save chat with the UID
+                        save_chat_to_db(prompt, full_response, user_uid)
+                        
                     except Exception as e:
                         try:
                             st.session_state.chat.rewind()
