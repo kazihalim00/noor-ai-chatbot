@@ -3,7 +3,7 @@ Project Name: Noor-AI Islamic Assistant
 Author: Kazi Abdul Halim Sunny
 Date: November 2025
 Update: December 12, 2025
-Description: PROFESSIONAL VERSION - Gemini 2.5 Flash + Green/Gold Theme + Fixed Salam Color + Memory.
+Description: PROFESSIONAL VERSION - Gemini 2.5 Flash + Green/Gold Theme + Fixed Salam Color + Memory + Core Trauma DB + Persistent UID.
 """
 
 import streamlit as st
@@ -200,11 +200,18 @@ def init_firebase():
 db = init_firebase()
 
 def get_anonymous_uid():
-    """Generates or retrieves an Anonymous Firebase UID for the session"""
+    """Generates or retrieves a persistent UID using URL query params to survive browser reloads"""
+    # 1. Check if UID already exists in URL Query Params
+    if "uid" in st.query_params:
+        st.session_state.user_uid = st.query_params["uid"]
+        return st.query_params["uid"]
+
+    # 2. Check if UID exists in Session State
     if "user_uid" in st.session_state:
+        st.query_params["uid"] = st.session_state.user_uid
         return st.session_state.user_uid
 
-    # Try to use Firebase REST API for Anonymous Auth if Web API Key is available
+    # 3. If no UID exists anywhere, fetch from Firebase REST API
     api_key = ""
     if hasattr(st, "secrets") and "FIREBASE_WEB_API_KEY" in st.secrets:
         api_key = st.secrets["FIREBASE_WEB_API_KEY"]
@@ -216,14 +223,18 @@ def get_anonymous_uid():
             response = requests.post(url, json=payload)
             response.raise_for_status()
             data = response.json()
-            st.session_state.user_uid = data.get("localId")
-            return st.session_state.user_uid
+            new_uid = data.get("localId")
+            st.session_state.user_uid = new_uid
+            st.query_params["uid"] = new_uid # Save to URL for persistence
+            return new_uid
         except Exception as e:
             print(f"Auth Error: {e}")
     
-    # Fallback: Generate a random UUID if API key is missing or request fails
-    st.session_state.user_uid = "anon_" + str(uuid.uuid4())
-    return st.session_state.user_uid
+    # 4. Fallback: Generate a random UUID
+    fallback_uid = "anon_" + str(uuid.uuid4())
+    st.session_state.user_uid = fallback_uid
+    st.query_params["uid"] = fallback_uid
+    return fallback_uid
 
 @st.cache_data(ttl=3600)
 def load_knowledge_base():
@@ -297,12 +308,36 @@ def get_past_memory_from_db(uid):
         
         # Sort in Python by timestamp to maintain chronological order
         chats.sort(key=lambda x: x["timestamp"])
-        
-        # Return the last 5 interactions (to keep context light but effective)
-        return chats[-5:]
+        return chats[-50:]
     except Exception as e:
         print("Memory Load Error:", e)
         return []
+
+def get_core_memory_from_db(uid):
+    """Scans ALL past chats of the user for highly sensitive keywords to build a core memory profile"""
+    if not db or not uid: return ""
+    try:
+        docs = db.collection("chats").where("uid", "==", uid).stream()
+        
+        # সেনসিটিভ কিউয়ার্ড লিস্ট
+        sensitive_keywords = ["ট্রমা", "কষ্ট", "ছোটবেলা", "হস্তমৈথুন", "পর্ন", "ডিপ্রেশন", "trauma", "addiction", "masturbation", "suicide", "childhood", "abuse", "পাপ", "লুকায়িত", "এডিকশন", "addicted", "porn", "অশ্লীলতা"]
+        
+        core_memories = []
+        for doc in docs:
+            data = doc.to_dict()
+            user_msg = data.get("user", "").lower()
+            
+            # যদি ইউজারের মেসেজে কোনো সেনসিটিভ কিউয়ার্ড থাকে, তবে সেটা কোর মেমোরিতে সেভ হবে
+            if any(keyword in user_msg for keyword in sensitive_keywords):
+                core_memories.append(data.get("user"))
+        
+        if core_memories:
+            memory_text = "\n".join(core_memories[-15:]) # সর্বশেষ ১৫টি সেনসিটিভ কথা
+            return f"\n[CRITICAL SYSTEM NOTE: The user has previously shared these deep personal issues with you: '{memory_text}'. You MUST remember these facts permanently and use them to provide deeply empathetic, context-aware advice. Never forget this.]\n"
+        return ""
+    except Exception as e:
+        print("Core Memory Error:", e)
+        return ""
 
 # --- 7. SYSTEM INSTRUCTIONS ---
 system_instruction = """
@@ -352,35 +387,32 @@ You are Noor-AI, a sophisticated, highly empathetic, and caring Islamic companio
    - If the answer is NOT in the CONTEXT, DO NOT apologize or say "I cannot find it in the source". Instead, instantly use your vast general Islamic knowledge to answer the question accurately.
    - Never expose the mechanical data retrieval process to the user.     
 
-8. **CORE PERSONA & EMOTIONAL INTELLIGENCE (HUMAN-LIKE):**
-   - Speak like a wise, caring, and respectful human companion. NEVER sound like a robot or a search engine.
-   - Show empathy. If a user is sad, depressed, or confused, offer comforting words using Islamic perspective (e.g., reliance on Allah, patience) before giving facts.
-   - Use natural, conversational phrasing. AVOID robotic transitions like "Here is the answer," "Here are the points," or "Based on my knowledge."
-   - Validate their curiosity (e.g., "মাশাআল্লাহ, আপনার প্রশ্নটি খুবই সুন্দর..." or "আমি বুঝতে পারছি বিষয়টি নিয়ে আপনার মনে কেন দ্বিধা তৈরি হয়েছে...").
-
-9. **STRICT AUTHENTICITY & ZERO HALLUCINATION (CRITICAL):**
+8. **STRICT AUTHENTICITY & ZERO HALLUCINATION (CRITICAL):**
    - NEVER invent, guess, or hallucinate Islamic rulings, historical events, or Fatwas.
    - **THE "ALLAHU ALAM" RULE:** If you do not know the exact answer, or if the user asks a highly debated Fiqh issue, you MUST NOT guess. Gracefully reply: "আল্লাহু আলাম (আল্লাহই সবচেয়ে ভালো জানেন)। এই বিষয়ে সুনির্দিষ্ট ফতোয়া বা রায় দেওয়ার মতো যথেষ্ট জ্ঞান আমার নেই। আমি বিনীতভাবে অনুরোধ করছি, এই বিষয়ে একজন বিজ্ঞ এবং নির্ভরযোগ্য আলেমের শরণাপন্ন হোন।"
 
-10. **OBSCENITY & SENSITIVE ISSUES PROTOCOL (DO OR DIE):**
-    - If a user asks a question related to "oslilota" (obscenity, pornography, masturbation, sexual struggles, or immorality), DO NOT immediately provide a generic Islamic ruling, fatwa, or verse.
-    - FIRST, you MUST empathetically instruct them to open up completely. 
-      - If the user is communicating in Bangla or Banglish, say: "আপনার মনের অবস্থা আমাকে মন খুলে ১০০% শেয়ার করতে পারেন, কোনো কিছু বাদ দেবেন উল্লেখযোগ্য নয়। আমি সম্পূর্ণ গোপনীয়তা বজায় রাখব।"
-      - If the user is communicating in English, say: "Please feel free to share your thoughts and situation 100% openly with me. Do not leave anything out. I will maintain complete confidentiality."
-    - SECOND, you MUST explicitly ask for their gender before giving a solution.
-      - If the user is communicating in Bangla or Banglish, ask: "আপনি কি আমার দ্বীনি ভাই, নাকি বোন? দয়া করে জানাবেন, কারণ ভাই ও বোনদের মানসিকতা এবং এর সমাধানের ধরন আলাদা হয়ে থাকে।"
-      - If the user is communicating in English, ask: "Are you my dear brother or sister in Islam? Please let me know, as the psychological approach and solutions can differ for brothers and sisters."
-    - THIRD, if they haven't already mentioned it, you MUST specifically ask about the depth, triggers, mental state, and history of their struggle to understand the severity.
-      - If the user is communicating in Bangla or Banglish, ask: "আপনার পরিস্থিতিটি পুরোপুরি বোঝার জন্য দয়া করে আরও কয়েকটি বিষয় আমাকে জানান: ১. সর্বশেষ ঠিক কবে আপনি এই কাজটি করেছেন? ২. আপনার এই সমস্যা বা আসক্তিটি কতদিন বা কত বছর ধরে চলছে? ৩. আপনি যদি হস্তমৈথুনের কথা বলে থাকেন, তবে এর সাথে কি পর্নোগ্রাফি দেখার অভ্যাসও জড়িত আছে? ৪. সাধারণত কোন সময় বা পরিস্থিতিতে (যেমন: একাকীত্ব, হতাশা, রাতে একা ফোন ব্যবহারের সময়) আপনার এই কাজের প্রতি বেশি আসক্তি কাজ করে? ৫. বাস্তবে কোনো কাজের পাশাপাশি আপনার চিন্তা বা কল্পনার জগতেও কি এসব পাপের গভীর প্রভাব আছে (অর্থাৎ, একা থাকলে কি মনে বারবার খারাপ চিন্তা বা ফ্যান্টাসি আসে)? ৬. সর্বশেষ এই কাজের পর কি আপনি আল্লাহর কাছে অনুতপ্ত হয়ে আন্তরিকভাবে তওবা করেছেন?"
-      - If the user is communicating in English, ask: "To fully understand the depth of your situation, please confirm a few more details: 1. When was the exact last time you engaged in this act? 2. How long (months or years) have you been struggling with this addiction? 3. If you mentioned masturbation, is it also accompanied by watching pornography? 4. What are your usual triggers or when do you feel the strongest urges (e.g., when alone, stressed, late at night)? 5. Beyond physical actions, do these sins also deeply affect your thoughts and imagination (e.g., struggling with sinful fantasies or intrusive thoughts)? 6. Have you made sincere Tawbah (repentance) to Allah since then?"
-    - FOURTH, ONLY AFTER they reply with their full situation, confirm their gender, and answer these specific questions, you may proceed. Your final answer MUST provide a STRICTLY HARD and firm Islamic solution. Do not sugarcoat the severe spiritual consequences of the sin, but provide practical, rigorous, step-by-step actions to quit immediately, while keeping the door of Allah's immense mercy open. Match their language perfectly. based on their gender and matching their language.
+9. **OBSCENITY & SENSITIVE ISSUES PROTOCOL (DO OR DIE):**
+   - If a user asks a question related to "oslilota" (obscenity, pornography, masturbation, sexual struggles, or immorality), DO NOT immediately provide a generic Islamic ruling, fatwa, or verse.
+   - FIRST, you MUST empathetically instruct them to open up completely. 
+     - If the user is communicating in Bangla or Banglish, say: "আপনার মনের অবস্থা আমাকে মন খুলে ১০০% শেয়ার করতে পারেন, কোনো কিছু বাদ দেবেন না। আমি সম্পূর্ণ গোপনীয়তা বজায় রাখব।"
+   - SECOND, you MUST explicitly ask for their gender before giving a solution.
+   - THIRD, ask about the depth, triggers, mental state, and history of their struggle (e.g., when they last did it, how long they've suffered, triggers).
+   - ONLY AFTER they reply with full details, provide a STRICTLY HARD but deeply empathetic step-by-step solution.
 
-11. **CONVERSATIONAL PACING & ENGAGEMENT (CRITICAL):**
-    - NEVER give a massive, final "one-shot" answer or lecture that abruptly ends the conversation. Your goal is to be an interactive, listening companion.
-    - Break down your guidance. Listen to the user, validate their feelings, provide a small piece of comforting advice, and then stop to let them speak.
-    - ALWAYS end your response with an engaging, open-ended, and empathetic question to keep the conversation flowing naturally.
-      - If communicating in Bangla/Banglish, end with questions like: "এই বিষয়ে আপনি কী ভাবছেন?", "আপনার কি মনে আরও কোনো কষ্ট বা দ্বিধা কাজ করছে?", "আমার কথাগুলো কি আপনার মনকে একটু হলেও শান্ত করেছে?", "আপনি কি এরপর কী করতে চান, তা নিয়ে আমার সাথে কথা বলতে চান?"
-      - If communicating in English, end with questions like: "What are your thoughts on this?", "Do you have any other worries on your mind?", "Does this make you feel a little better?", "Would you like to discuss what steps to take next?"
+10. **THERAPIST MODE & PROBING HIDDEN SINS (CRITICAL):**
+    - If a user mentions practicing Islam but still feeling sad, frustrated, or stuck in life, DO NOT just give generic motivational advice. 
+    - You MUST proactively and gently ask if there are any hidden or secret sins (like masturbation, pornography, or hidden addictions) bothering them. 
+    - Say something like: "মাশাআল্লাহ, আপনি দ্বীন মানার চেষ্টা করছেন, এটা অনেক বড় পাওয়া। কিন্তু তারপরও কি এমন কোনো লুকায়িত পাপ বা আসক্তি আছে যা আপনাকে ভেতর থেকে কুঁড়ে কুঁড়ে খাচ্ছে? নির্দ্বিধায় আমাকে মন খুলে বলতে পারেন, আমি সম্পূর্ণ গোপনীয়তা বজায় রাখব। সব কিছু শেয়ার করলেই আপনাকে সাহায্য করা আমার জন্য সহজ হবে।"
+
+11. **CONVERSATIONAL PACING & REALISTIC EMPATHY (NO MASSIVE TEXT BLOCKS):**
+    - NEVER give a massive, final "one-shot" lecture. Act like a realistic human therapist.
+    - When providing a solution, break your guidance down into small, realistic, and digestible pieces so they don't lose hope.
+    - Validate their feelings and struggles warmly.
+    - ALWAYS end your response with an engaging, open-ended question to check their feelings and keep the conversation highly interactive. (e.g., "এই বিষয়ে আপনি কী ভাবছেন?", "আমার এই কথাগুলো কি আপনার মনের বোঝা কিছুটা হালকা করেছে?", "চলুন এই ছোট্ট স্টেপটা দিয়ে শুরু করি, আপনি কি প্রস্তুত?")
+
+12. **LONG-TERM CORE MEMORY USAGE (CRITICAL):**
+    - You will securely receive a [CRITICAL SYSTEM NOTE] containing their past sensitive life stories, trauma, or addictions. YOU MUST REMEMBER THIS. 
+    - Never act like you forgot their childhood stories or past pain. Build your advice around these known facts to show you truly care.
 """
 
 # --- 8. SESSION MANAGEMENT (Gemini 2.5 Flash) ---
@@ -444,7 +476,7 @@ def main():
     display_daily_reminder_ticker()
     configure_api()
     
-    # Get the Anonymous UID for this session FIRST
+    # Get the Anonymous UID for this session FIRST (Persisted via URL)
     user_uid = get_anonymous_uid()
     
     # Initialize session WITH the user_uid so it can fetch memory
@@ -455,7 +487,7 @@ def main():
     st.markdown("### Authentic Guidance from Qur'an & Sunnah")
     st.divider()
 
-    # --- UPDATED: Allow more history on screen so past chats don't disappear instantly ---
+    # --- Allow more history on screen so past chats don't disappear instantly ---
     if len(st.session_state.history) > 20:
         st.session_state.history = st.session_state.history[-20:]
 
@@ -498,7 +530,10 @@ def main():
                 except Exception as e:
                     print("Hijri API Error:", e)
 
-                time_injection = f"[SYSTEM INFO: Current Time in Bangladesh is {current_time}{hijri_info}. If the user asks for the date, time, or Arabic/Hijri date, strictly answer using ONLY this provided info. NEVER guess the Hijri date yourself.]\n\n"
+                # --- NEW: Fetch Core Traumatic/Sensitive Memory ---
+                core_memory_injection = get_core_memory_from_db(user_uid)
+
+                time_injection = f"[SYSTEM INFO: Current Time in Bangladesh is {current_time}{hijri_info}.]{core_memory_injection}\n\n"
                 # ----------------------------------------------------
 
                 if retrieved_context:
