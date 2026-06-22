@@ -3,7 +3,7 @@ Project Name: Noor-AI Islamic Assistant
 Author: Kazi Abdul Halim Sunny
 Date: November 2025
 Update: December 12, 2025
-Description: PROFESSIONAL VERSION - Gemini 2.5 Flash + Fixed Salam + Core Trauma DB + Secret Code Memory Restore + FULL INSTRUCTIONS.
+Description: PROFESSIONAL VERSION - Gemini 2.5 Flash + Fixed Salam + Core Trauma DB + PERFECTED Memory Restore + FULL INSTRUCTIONS.
 """
 
 import streamlit as st
@@ -141,20 +141,17 @@ def init_firebase():
 
 db = init_firebase()
 
-# --- 5. ROBUST ID MANAGEMENT (NO COOKIES, USES URL & SECRET CODE) ---
+# --- 5. ROBUST ID MANAGEMENT (NO COOKIES, USES URL & SESSION) ---
 def get_or_create_uid():
     """Generates or retrieves a persistent UID natively using Streamlit URL parameters and Session State"""
-    # 1. Check if UID is in URL params
     if "uid" in st.query_params:
         st.session_state.user_uid = st.query_params["uid"]
         return st.query_params["uid"]
         
-    # 2. Check if UID is in session state
     if "user_uid" in st.session_state:
         st.query_params["uid"] = st.session_state.user_uid
         return st.session_state.user_uid
         
-    # 3. Create a Memorable Short UID if brand new (No Firebase Auth API needed, making it super fast)
     new_uid = "Noor-" + str(uuid.uuid4().hex[:6]).upper()
     st.session_state.user_uid = new_uid
     st.query_params["uid"] = new_uid
@@ -210,7 +207,7 @@ def get_past_memory_from_db(uid):
             if "timestamp" in data and data["timestamp"]:
                 chats.append(data)
         chats.sort(key=lambda x: x["timestamp"])
-        return chats[-50:]
+        return chats[-50:] # Get last 50 full conversations
     except Exception as e:
         print("Memory Load Error:", e)
         return []
@@ -328,12 +325,15 @@ You are Noor-AI, a sophisticated, highly empathetic, and caring Islamic companio
     - PROUDLY and EMPATHETICALLY state exactly what they told you before. (e.g., "হ্যাঁ, অবশ্যই আমার মনে আছে! আপনি আমাকে বলেছিলেন যে আপনার ছোটবেলার একটি ট্রমা আছে এবং আপনার স্পেশাল কিওয়ার্ড হলো...")
 """
 
-# --- 8. SESSION MANAGEMENT ---
+# --- 8. SESSION MANAGEMENT (PERFECTED RESTORE LOGIC) ---
 def initialize_session(user_uid):
-    if "history" not in st.session_state:
+    # FORCE reload if the loaded ID is different from the current URL ID
+    if "loaded_uid" not in st.session_state or st.session_state.loaded_uid != user_uid:
         st.session_state.history = []
-        past_db_chats = get_past_memory_from_db(user_uid)
         gemini_history = []
+        
+        # Fetch the last 50 actual chat histories from the database
+        past_db_chats = get_past_memory_from_db(user_uid)
         
         for chat in past_db_chats:
             if "user" in chat and chat["user"]:
@@ -344,9 +344,10 @@ def initialize_session(user_uid):
                 gemini_history.append({"role": "model", "parts": [chat["ai"]]})
                 
         st.session_state.gemini_history = gemini_history
+        st.session_state.loaded_uid = user_uid # Mark this ID as successfully loaded
         
-    try:
-        if "model" not in st.session_state:
+        # Initialize Gemini Model with the loaded history
+        try:
             safety_settings = {
                 HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_NONE,
                 HarmCategory.HARM_CATEGORY_HATE_SPEECH: HarmBlockThreshold.BLOCK_NONE,
@@ -358,9 +359,9 @@ def initialize_session(user_uid):
                 system_instruction=system_instruction,
                 safety_settings=safety_settings
             )
-            st.session_state.chat = st.session_state.model.start_chat(history=st.session_state.get("gemini_history", []))
-    except Exception as e:
-        st.error(f"System Initialization Failure: {e}")
+            st.session_state.chat = st.session_state.model.start_chat(history=st.session_state.gemini_history)
+        except Exception as e:
+            st.error(f"System Initialization Failure: {e}")
 
 # --- 9. SIDEBAR & RESTORE SYSTEM ---
 def display_sidebar():
@@ -371,7 +372,7 @@ def display_sidebar():
         st.markdown("### Kazi Abdul Halim Sunny")
         
         st.markdown("---")
-        # --- NEW: MEMORY RESTORE SYSTEM ---
+        # --- MEMORY RESTORE SYSTEM ---
         st.markdown("### 🔐 আপনার গোপন কোড")
         current_uid = st.session_state.get("user_uid", "")
         st.code(current_uid, language=None)
@@ -381,21 +382,22 @@ def display_sidebar():
         restore_uid = st.text_input("আপনার আগের কোডটি এখানে দিন:", placeholder="e.g. Noor-1A2B3C")
         if st.button("চ্যাট রিস্টোর করুন"):
             if restore_uid:
-                st.session_state.user_uid = restore_uid.strip()
-                st.query_params["uid"] = restore_uid.strip()
-                st.session_state.history = [] # Clear screen to load old chats
+                clean_uid = restore_uid.strip()
+                st.session_state.user_uid = clean_uid
+                st.query_params["uid"] = clean_uid
+                # Delete loaded_uid to trigger a forced database reload
+                if "loaded_uid" in st.session_state:
+                    del st.session_state.loaded_uid
                 st.rerun()
         # ----------------------------------
         
         st.markdown("---")
-        # --- RESTORED: THE MISSING INFO BOXES AND EXPORT BUTTON ---
         st.info("Insights derived strictly from the Holy Qur'an & Authentic Sunnah.")
         st.warning("Disclaimer: For specific Fiqh rulings, kindly consult a qualified local scholar.")
         
         if st.session_state.history:
             chat_str = "\n".join([f"{m['role']}: {m['content']}" for m in st.session_state.history])
             st.download_button("📥 Export Conversation", chat_str, "noor_ai_session.txt")
-        # ---------------------------------------------------------
 
 # --- 10. MAIN APP ---
 def main():
@@ -407,7 +409,7 @@ def main():
     # Get the Persistent UID
     user_uid = get_or_create_uid()
     
-    # Initialize session WITH the persistent user_uid
+    # Initialize session WITH the persistent user_uid. This will load history perfectly.
     initialize_session(user_uid)
     display_sidebar()
 
@@ -415,10 +417,11 @@ def main():
     st.markdown("### Authentic Guidance from Qur'an & Sunnah")
     st.divider()
 
-    if len(st.session_state.history) > 20:
-        st.session_state.history = st.session_state.history[-20:]
+    # --- PERFECT HISTORY DISPLAY ---
+    # Instead of deleting history from session, we safely slice ONLY for visual display
+    display_history = st.session_state.history[-40:] # Show up to last 40 messages on screen
 
-    for message in st.session_state.history:
+    for message in display_history:
         role = message["role"]
         avatar = "👤" if role == "user" else "🎓"
         with st.chat_message(role, avatar=avatar):
