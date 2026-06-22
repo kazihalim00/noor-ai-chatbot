@@ -3,3 +3,4 @@ google-generativeai
 firebase-admin
 requests
 pytz
+streamlit-cookies-controller
