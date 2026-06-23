@@ -3,7 +3,7 @@ Project Name: Noor-AI Islamic Assistant
 Author: Kazi Abdul Halim Sunny
 Date: November 2025
 Update: December 12, 2025
-Description: PROFESSIONAL VERSION - Gemini 2.5 Flash + Fixed Salam + PERFECTED Memory Restore + ADVANCED THERAPIST & STEP-BY-STEP PROBING MODE.
+Description: PROFESSIONAL VERSION - Gemini 2.5 Flash + Fixed Salam + DEEP MEMORY (50 Chats) + STRICT THERAPIST PROBING + New Restore Code.
 """
 
 import streamlit as st
@@ -206,7 +206,7 @@ def get_past_memory_from_db(uid):
             if "timestamp" in data and data["timestamp"]:
                 chats.append(data)
         chats.sort(key=lambda x: x["timestamp"])
-        return chats[-50:]
+        return chats[-50:] # Fetches up to 50 for full deep context
     except Exception as e:
         print("Memory Load Error:", e)
         return []
@@ -270,60 +270,70 @@ You are Noor-AI, a sophisticated, highly empathetic, and caring Islamic companio
 8. **STRICT AUTHENTICITY & ZERO HALLUCINATION:**
    - NEVER invent Fatwas. If unsure, gracefully reply: "আল্লাহু আলাম (Allah knows best)..." and ask them to consult a scholar.
 
-9. **OBSCENITY & SENSITIVE ISSUES: STEP-BY-STEP DEEP PROBING PROTOCOL (DO OR DIE):**
-   - If a user mentions masturbation, pornography, or sexual struggles, DO NOT give any solution yet. 
+9. **OBSCENITY & SENSITIVE ISSUES: STEP-BY-STEP DEEP PROBING PROTOCOL (ABSOLUTE MANDATORY OVERRIDE):**
+   - If a user mentions masturbation, pornography, or sexual struggles, YOU ARE FORBIDDEN from giving any solutions or advice immediately. 
    - You MUST deeply investigate their habit by asking these specific questions. 
    - **CRITICAL RULE:** STRICTLY ASK ONLY ONE QUESTION AT A TIME. DO NOT ASK ALL OF THEM IN A SINGLE MESSAGE.
-     - **Step 1:** Ask: "সর্বশেষ ঠিক কবে এবং কোন দিন আপনি হস্তমৈথুন বা পর্ন দেখেছেন?" (English: "When was the exact last time and day you engaged in masturbation or watched porn?")
-     - **WAIT FOR THEIR REPLY.** Do not proceed until they answer.
-     - **Step 2:** Validate their answer, then ask: "সাধারণত দিনের কোন সময়ে এই আসক্তি বেশি কাজ করে? রাতে ঘুমানোর আগে, নাকি সকালে?" (English: "At what time of day do you usually feel this urge the most? Before sleeping, or in the morning?")
-     - **WAIT FOR THEIR REPLY.**
-     - **Step 3:** Validate, then ask: "এই কাজটা সাধারণত কোথায় বেশি হয়? ওয়াশরুমে গিয়ে, নাকি নিজের রুমের বিছানায়?" (English: "Where does this usually happen? In the washroom, or in your bed?")
-   - You must gather 100% of this context step-by-step before attempting to solve the problem.
+     - **Step 1:** First, you MUST ask: "আমি আপনার পরিস্থিতি বুঝতে পারছি। তবে আপনাকে সাহায্য করার জন্য আমাকে একটু খুলে বলুন, সর্বশেষ ঠিক কবে এবং কোন দিন আপনি এই কাজটি (পর্ন বা হস্তমৈথুন) করেছেন?" 
+     - **STOP AND WAIT FOR THEIR REPLY.** Do not proceed to Step 2 until they answer Step 1.
+     - **Step 2:** Once they tell you *when*, validate them, then ask: "সাধারণত দিনের কোন সময়ে এই আসক্তি বেশি কাজ করে? রাতে ঘুমানোর আগে, নাকি সকালে বা দুপুরে?"
+     - **STOP AND WAIT FOR THEIR REPLY.**
+     - **Step 3:** Once they tell you *time*, validate, then ask: "এই কাজটা সাধারণত কোথায় বেশি হয়? ওয়াশরুমে গিয়ে, নাকি নিজের রুমের বিছানায় একা থাকলে?"
+     - **STOP AND WAIT FOR THEIR REPLY.**
+   - You must gather 100% of this context step-by-step. If they speak English, translate these exact questions to English.
 
 10. **THERAPIST MODE & HIDDEN SINS:**
     - If a user feels stuck/sad despite practicing Islam, proactively ask if there are hidden sins (masturbation/porn). 
     - **In Bangla:** "মাশাআল্লাহ, আপনি দ্বীন মানার চেষ্টা করছেন। কিন্তু তারপরও কি এমন কোনো লুকায়িত পাপ বা আসক্তি (যেমন পর্ন বা হস্তমৈথুন) আছে যা আপনাকে ভেতর থেকে কুঁড়ে কুঁড়ে খাচ্ছে? নির্দ্বিধায় আমাকে মন খুলে বলতে পারেন..."
-    - **In English:** "MashaAllah, you are trying to practice Islam. But despite that, is there any hidden sin or addiction (like masturbation or porn) that is eating you up from the inside? Please feel free to open up to me completely..."
 
-11. **CASE STUDY & EMOTIONAL BONDING:**
+11. **CASE STUDY & EMOTIONAL BONDING (USER RETENTION):**
     - Explain *why* they are sinning, connecting trauma/loneliness to dopamine-seeking.
+    - Make them feel incredibly validated, safe, and understood. Act like a highly qualified, caring best friend.
     - **In Bangla:** "আপনার ছোটবেলার ওই ট্রমা বা একাকীত্ব থেকে বাঁচতেই আপনার ব্রেইন হয়তো এই পর্নোগ্রাফি বা হস্তমৈথুনের মধ্যে সাময়িক শান্তি খুঁজছে। আমি আপনার কষ্টটা একদম নিজের মতো করে অনুভব করতে পারছি।"
-    - **In English:** "To escape that childhood trauma or loneliness, your brain might be seeking dopamine or temporary peace through pornography or masturbation. I can truly feel your pain as if it were my own."
 
 12. **DYNAMIC CHATTING, NO REPETITION & ACCOUNTABILITY (CRITICAL):**
     - NEVER repeat the same robotic phrases or questions over and over.
-    - Act like a human chatting on WhatsApp. Keep responses SHORT (2-3 paragraphs max). Give solutions LITTLE BY LITTLE, step-by-step.
+    - Keep responses SHORT (2-3 paragraphs max). Give solutions LITTLE BY LITTLE, step-by-step.
     - **ACCOUNTABILITY HACK:** If you ask a question and the user replies but dodges/ignores your specific question, YOU MUST GENTLY CALL THEM OUT. 
       - **In Bangla:** "আপনি কিন্তু আমার আগের প্রশ্নের উত্তরটা দেননি। আমাকে খুলে বলুন, সর্বশেষ কবে..."
       - **In English:** "You didn't answer my previous question. Please be open and tell me, when was the last time..."
 
 13. **LONG-TERM CORE MEMORY USAGE (CRITICAL):**
     - You will securely receive a [CRITICAL SYSTEM NOTE] containing their past trauma or keywords. YOU MUST REMEMBER THIS PERMANENTLY. 
-    - Build your ongoing advice around their specific trauma. Never forget it.
+    - Always factor in their past chats (which you have access to in the history) to provide continuous, relevant advice without asking them to repeat their whole story.
 
 14. **EXPLICIT MEMORY RECALL (DO OR DIE):**
-    - If the user asks "Do you remember me?", "What is my story?", or "What is my keyword?", IMMEDIATELY scan the [CRITICAL SYSTEM NOTE].
+    - If the user asks "Do you remember me?", "What is my story?", or "What is my keyword?", IMMEDIATELY scan the [CRITICAL SYSTEM NOTE] and your chat history.
     - PROUDLY state exactly what they told you before.
-      - **In Bangla:** "হ্যাঁ, অবশ্যই আমার মনে আছে! আপনি আমাকে বলেছিলেন যে..."
-      - **In English:** "Yes, of course I remember! You told me that..."
 """
 
-# --- 8. SESSION MANAGEMENT (PERFECTED RESTORE LOGIC) ---
+# --- 8. SESSION MANAGEMENT (ANTI-CRASH DEEP MEMORY RESTORE LOGIC) ---
 def initialize_session(user_uid):
     if "loaded_uid" not in st.session_state or st.session_state.loaded_uid != user_uid:
         st.session_state.history = []
         gemini_history = []
         
-        past_db_chats = get_past_memory_from_db(user_uid)
+        past_db_chats = get_past_memory_from_db(user_uid) 
         
+        # 1. Build Display History 
         for chat in past_db_chats:
             if "user" in chat and chat["user"]:
                 st.session_state.history.append({"role": "user", "content": chat["user"]})
-                gemini_history.append({"role": "user", "parts": [chat["user"]]})
             if "ai" in chat and chat["ai"]:
                 st.session_state.history.append({"role": "assistant", "content": chat["ai"]})
-                gemini_history.append({"role": "model", "parts": [chat["ai"]]})
+
+        # 2. Build Gemini History STRICTLY (Anti-Crash but Deep Memory)
+        # We now feed up to 40 valid conversation PAIRS (80 messages total) to the API
+        # This ensures it remembers yesterday's exact chat context without crashing!
+        recent_chats_for_api = past_db_chats[-40:] 
+        
+        for chat in recent_chats_for_api:
+            u_text = chat.get("user", "").strip()
+            a_text = chat.get("ai", "").strip()
+            # Strict pairing validation to prevent 400 Bad Request error
+            if u_text and a_text:
+                gemini_history.append({"role": "user", "parts": [u_text]})
+                gemini_history.append({"role": "model", "parts": [a_text]})
                 
         st.session_state.gemini_history = gemini_history
         st.session_state.loaded_uid = user_uid 
@@ -344,7 +354,7 @@ def initialize_session(user_uid):
         except Exception as e:
             st.error(f"System Initialization Failure: {e}")
 
-# --- 9. SIDEBAR & RESTORE SYSTEM ---
+# --- 9. SIDEBAR & ADVANCED RESTORE SYSTEM ---
 def display_sidebar():
     with st.sidebar:
         st.title("🌙 Noor-AI")
@@ -360,11 +370,34 @@ def display_sidebar():
         
         st.markdown("**Want to restore old chats?**")
         restore_uid = st.text_input("Enter your previous code here:", placeholder="e.g. Noor-1A2B3C")
+        
         if st.button("Restore Chats"):
             if restore_uid:
-                clean_uid = restore_uid.strip()
-                st.session_state.user_uid = clean_uid
-                st.query_params["uid"] = clean_uid
+                old_uid = restore_uid.strip()
+                
+                # --- NEW LOGIC: Generate a brand new code upon restore and migrate data ---
+                new_assigned_uid = "Noor-" + str(uuid.uuid4().hex[:6]).upper()
+                
+                if db:
+                    try:
+                        # Fetch old chats
+                        old_docs = db.collection("chats").where("uid", "==", old_uid).stream()
+                        # Copy them to the newly generated UID seamlessly
+                        for doc in old_docs:
+                            doc_data = doc.to_dict()
+                            db.collection("chats").add({
+                                "user": doc_data.get("user", ""),
+                                "ai": doc_data.get("ai", ""),
+                                "uid": new_assigned_uid,
+                                "timestamp": doc_data.get("timestamp") # Preserve original timeline
+                            })
+                    except Exception as e:
+                        print("Migration Error:", e)
+
+                # Set session to the newly created secure code
+                st.session_state.user_uid = new_assigned_uid
+                st.query_params["uid"] = new_assigned_uid
+                
                 if "loaded_uid" in st.session_state:
                     del st.session_state.loaded_uid
                 st.rerun()
@@ -392,7 +425,8 @@ def main():
     st.markdown("### Authentic Guidance from Qur'an & Sunnah")
     st.divider()
 
-    display_history = st.session_state.history[-40:] 
+    # Display up to 50 messages on the screen
+    display_history = st.session_state.history[-50:] 
 
     for message in display_history:
         role = message["role"]
@@ -464,7 +498,7 @@ def main():
                         if "429" in error_msg or "quota" in error_msg:
                             message_placeholder.warning("⏳ সার্ভারে অনেক চাপ! দয়া করে একটু অপেক্ষা করে আবার প্রশ্ন করুন।")
                         else:
-                            message_placeholder.error("⚠️ নেটওয়ার্ক সমস্যার কারণে উত্তরটি জেনারেট হতে পারেনি। অনুগ্রহ করে পেজটি রিলোড (Refresh) করে আবার চেষ্টা করুন।")
+                            message_placeholder.error(f"⚠️ নেটওয়ার্ক বা হিস্ট্রি সমস্যার কারণে উত্তরটি জেনারেট হতে পারেনি। অনুগ্রহ করে পেজটি রিলোড (Refresh) করে আবার চেষ্টা করুন।\n\nError Details: {e}")
             except Exception as e:
                 message_placeholder.error(f"Processing Error: {e}")
 
