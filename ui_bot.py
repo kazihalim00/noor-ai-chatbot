@@ -3,7 +3,7 @@ Project Name: Noor-AI Islamic Assistant
 Author: Kazi Abdul Halim Sunny
 Date: November 2025
 Update: December 12, 2025
-Description: PROFESSIONAL VERSION - Gemini 2.5 Flash + Fixed Salam + DEEP MEMORY (50 Chats) + STRICT THERAPIST PROBING + New Restore Code.
+Description: PROFESSIONAL VERSION - Gemini 2.5 Flash + Fixed Salam + DEEP MEMORY + PERFECTED AYAH CITATION + 100% HUMAN MIRRORING.
 """
 
 import streamlit as st
@@ -206,7 +206,7 @@ def get_past_memory_from_db(uid):
             if "timestamp" in data and data["timestamp"]:
                 chats.append(data)
         chats.sort(key=lambda x: x["timestamp"])
-        return chats[-50:] # Fetches up to 50 for full deep context
+        return chats[-50:]
     except Exception as e:
         print("Memory Load Error:", e)
         return []
@@ -247,10 +247,11 @@ You are Noor-AI, a sophisticated, highly empathetic, and caring Islamic companio
    - If the user greets in English: "Wa 'alaykumu s-salam wa rahmatullahi wa barakatuh."
    - If the user greets in Bangla/Banglish: "ওয়া আলাইকুমুস সালাম ওয়া রাহমাতুল্লাহি ওয়া বারাকাতুহ"
 
-3. **CITATION & LINKS (MANDATORY FORMAT):**
-   - **Quran:** **[Surah Name: Ayah](https://quran.com/SURAH_NUMBER/AYAH_NUMBER)**
-   - **Hadith:** **[Book Name: Number](https://sunnah.com/BOOK_SLUG/NUMBER)**
-   - NEVER put the Ayah or Hadith text inside the hyperlink brackets.
+3. **CITATION, LINKS & QURANIC VERSES (CRITICAL FORMAT):**
+   - **MANDATORY RULE:** Whenever you reference the Quran or Hadith, you MUST write the actual verse/translation in plain text FIRST. Do not just drop a link.
+   - **Quran:** First write the meaning. Then cite strictly as: **[Surah Name: Ayah](https://quran.com/SURAH_NUMBER/AYAH_NUMBER)**
+   - **Hadith:** First write the text normally. Then cite: **[Book Name: Number](https://sunnah.com/BOOK_SLUG/NUMBER)**
+   - NEVER put the Ayah or Hadith text inside the `[ ]` hyperlink brackets. Only the reference name MUST be the link.
 
 4. **IDENTITY & BIO:**
    - **Developer Name:** Kazi Abdul Halim Sunny.
@@ -305,6 +306,15 @@ You are Noor-AI, a sophisticated, highly empathetic, and caring Islamic companio
 14. **EXPLICIT MEMORY RECALL (DO OR DIE):**
     - If the user asks "Do you remember me?", "What is my story?", or "What is my keyword?", IMMEDIATELY scan the [CRITICAL SYSTEM NOTE] and your chat history.
     - PROUDLY state exactly what they told you before.
+
+15. **STRICT PERSONA MAINTENANCE (NO SYSTEM ERRORS):**
+    - Never break character. You are a natural human-like Islamic companion. 
+    - NEVER say things like "ওয়েবসাইটটি বর্তমানে নির্মাণাধীন আছে" (The website is under construction) or act like a generic system bot, no matter how confusing the user's prompt is. If you don't understand, politely ask them to clarify in a friendly tone.
+
+16. **100% HUMAN-LIKE BEHAVIOR & USER MIRRORING (CRITICAL):**
+    - You MUST act, speak, and react 100% like a real, empathetic human being.
+    - Observe the user's tone, style, and energy, and MIRROR it perfectly. If they are casual, be casual. If they are emotional, be deeply comforting and warm.
+    - NEVER use robotic phrases like "আমি একজন এআই", "আমি একটি ল্যাঙ্গুয়েজ মডেল", "আমি আপনাকে সাহায্য করতে প্রস্তুত", or "আমি বুঝতে পারছি". Instead, use natural conversational responses like a true friend.
 """
 
 # --- 8. SESSION MANAGEMENT (ANTI-CRASH DEEP MEMORY RESTORE LOGIC) ---
@@ -315,22 +325,17 @@ def initialize_session(user_uid):
         
         past_db_chats = get_past_memory_from_db(user_uid) 
         
-        # 1. Build Display History 
         for chat in past_db_chats:
             if "user" in chat and chat["user"]:
                 st.session_state.history.append({"role": "user", "content": chat["user"]})
             if "ai" in chat and chat["ai"]:
                 st.session_state.history.append({"role": "assistant", "content": chat["ai"]})
 
-        # 2. Build Gemini History STRICTLY (Anti-Crash but Deep Memory)
-        # We now feed up to 40 valid conversation PAIRS (80 messages total) to the API
-        # This ensures it remembers yesterday's exact chat context without crashing!
         recent_chats_for_api = past_db_chats[-40:] 
         
         for chat in recent_chats_for_api:
             u_text = chat.get("user", "").strip()
             a_text = chat.get("ai", "").strip()
-            # Strict pairing validation to prevent 400 Bad Request error
             if u_text and a_text:
                 gemini_history.append({"role": "user", "parts": [u_text]})
                 gemini_history.append({"role": "model", "parts": [a_text]})
@@ -374,27 +379,22 @@ def display_sidebar():
         if st.button("Restore Chats"):
             if restore_uid:
                 old_uid = restore_uid.strip()
-                
-                # --- NEW LOGIC: Generate a brand new code upon restore and migrate data ---
                 new_assigned_uid = "Noor-" + str(uuid.uuid4().hex[:6]).upper()
                 
                 if db:
                     try:
-                        # Fetch old chats
                         old_docs = db.collection("chats").where("uid", "==", old_uid).stream()
-                        # Copy them to the newly generated UID seamlessly
                         for doc in old_docs:
                             doc_data = doc.to_dict()
                             db.collection("chats").add({
                                 "user": doc_data.get("user", ""),
                                 "ai": doc_data.get("ai", ""),
                                 "uid": new_assigned_uid,
-                                "timestamp": doc_data.get("timestamp") # Preserve original timeline
+                                "timestamp": doc_data.get("timestamp") 
                             })
                     except Exception as e:
                         print("Migration Error:", e)
 
-                # Set session to the newly created secure code
                 st.session_state.user_uid = new_assigned_uid
                 st.query_params["uid"] = new_assigned_uid
                 
@@ -425,7 +425,6 @@ def main():
     st.markdown("### Authentic Guidance from Qur'an & Sunnah")
     st.divider()
 
-    # Display up to 50 messages on the screen
     display_history = st.session_state.history[-50:] 
 
     for message in display_history:
