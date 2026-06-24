@@ -3,7 +3,7 @@ Project Name: Noor-AI Islamic Assistant
 Author: Kazi Abdul Halim Sunny
 Date: November 2025
 Update: December 12, 2025
-Description: PROFESSIONAL VERSION - Gemini 2.5 Flash + Fixed Salam + DEEP MEMORY + PERFECTED 100% WORKING RESTORE + ALL 16 INSTRUCTIONS.
+Description: PROFESSIONAL VERSION - Gemini 2.5 Flash + Fixed Salam + DEEP MEMORY + 16 INSTRUCTIONS + STREAM BUG FIX (Auto-Healing).
 """
 
 import streamlit as st
@@ -143,18 +143,15 @@ db = init_firebase()
 
 # --- 5. ROBUST ID MANAGEMENT ---
 def get_or_create_uid():
-    # Priority 1: Session State (Highest priority for stable routing)
     if "user_uid" in st.session_state:
         st.query_params["uid"] = st.session_state.user_uid
         return st.session_state.user_uid
         
-    # Priority 2: URL Parameter
     if "uid" in st.query_params:
         uid = st.query_params["uid"]
         st.session_state.user_uid = uid
         return uid
         
-    # Priority 3: Generate New
     new_uid = "Noor-" + str(uuid.uuid4().hex[:6]).upper()
     st.session_state.user_uid = new_uid
     st.query_params["uid"] = new_uid
@@ -383,13 +380,9 @@ def display_sidebar():
         if st.button("Restore Chats"):
             if restore_uid:
                 clean_uid = restore_uid.strip()
-                
-                # UPDATE: Direct & Instant Restore (Lightning Fast)
-                # No data migration loop. Directly links to the provided ID perfectly.
                 st.session_state.user_uid = clean_uid
                 st.query_params["uid"] = clean_uid
                 
-                # Delete loaded_uid to force a fresh memory load from DB instantly
                 if "loaded_uid" in st.session_state:
                     del st.session_state.loaded_uid
                     
@@ -471,17 +464,32 @@ def main():
                         response = st.session_state.chat.send_message(final_prompt, stream=True)
                         
                         def stream_data():
-                            for chunk in response:
-                                if chunk.text:
-                                    yield chunk.text
+                            try:
+                                for chunk in response:
+                                    if chunk.text:
+                                        yield chunk.text
+                            except Exception as chunk_e:
+                                # Handles safety blocks gracefully inside the stream
+                                pass
                                     
                         full_response = message_placeholder.write_stream(stream_data())
+                        
+                        # FIX: Explicitly resolve the stream to prevent iteration error next time
+                        try:
+                            response.resolve()
+                        except:
+                            pass
+                            
                         st.session_state.history.append({"role": "assistant", "content": full_response})
                         save_chat_to_db(prompt, full_response, user_uid)
                         
                     except Exception as e:
                         try: st.session_state.chat.rewind()
                         except: pass
+                        
+                        # FIX: Auto-heal the corrupted chat session for the next run
+                        if "loaded_uid" in st.session_state:
+                            del st.session_state.loaded_uid
                             
                         if st.session_state.history and st.session_state.history[-1]["role"] == "user":
                             st.session_state.history.pop()
