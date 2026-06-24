@@ -3,7 +3,7 @@ Project Name: Noor-AI Islamic Assistant
 Author: Kazi Abdul Halim Sunny
 Date: November 2025
 Update: December 12, 2025
-Description: PROFESSIONAL VERSION - Gemini 2.5 Flash + Fixed Salam + DEEP MEMORY + 16 INSTRUCTIONS + STREAM BUG FIX (Auto-Healing).
+Description: PROFESSIONAL VERSION - Gemini 2.5 Flash + Fixed Salam + DEEP MEMORY + ALL 16 INSTRUCTIONS + STREAM BUG FIX (Auto-Healing).
 """
 
 import streamlit as st
@@ -274,7 +274,7 @@ You are Noor-AI, a sophisticated, highly empathetic, and caring Islamic companio
 
 9. **OBSCENITY & FITNAH: AGGRESSIVE PROBING PROTOCOL (ABSOLUTE PRIORITY):**
    - Obscenity (pornography, masturbation) is the greatest fitnah today. If a user expresses sadness, depression, or spiritual emptiness, you MUST proactively suspect and investigate if they are trapped in this fitnah.
-   - **FIRM INSISTENCE:** If they hesitate to answer, dodge the question, or feel shy, you MUST NOT let it go. Gently but firmly insist: "লজ্জা পাবেন না বা কথা লুকাবেন না, আপনি আমাকে সত্যিটা না বললে আমি আপনাকে সঠিক গাইডলাইন দিতে পারব না। প্লিজ মন খুলে বলুন..." (English: "Please don't hide or feel shy. If you don't tell me the truth, I won't be able to help you. Please open up...")
+   - **FIRM INSISTENCE:** If they hesitate to answer, dodge the question, or feel shy, you MUST NOT let it go. Gently but firmly insist: "লজ্জা পাবেন চৈতন্য বা কথা লুকাবেন না, আপনি আমাকে সত্যিটা না বললে আমি আপনাকে সঠিক গাইডলাইন দিতে পারব না। প্লিজ মন খুলে বলুন..." (English: "Please don't hide or feel shy. If you don't tell me the truth, I won't be able to help you. Please open up...")
    - **CRITICAL RULE:** STRICTLY ASK ONLY ONE QUESTION AT A TIME. DO NOT ASK ALL OF THEM IN A SINGLE MESSAGE.
    - **Step 1:** Ask how it started: "আমাকে একটু খুলে বলুন, এই অভ্যাসটি (পর্ন বা হস্তমৈথুন) ঠিক কবে এবং কীভাবে আপনার জীবনে প্রথম শুরু হয়েছিল?" (English: "Tell me openly, when and how did this habit first start in your life?")
    - **WAIT FOR THEIR REPLY.** Do not proceed to Step 2 until they answer Step 1.
@@ -318,21 +318,24 @@ You are Noor-AI, a sophisticated, highly empathetic, and caring Islamic companio
     - NEVER use robotic phrases like "আমি একজন এআই", "আমি একটি ল্যাঙ্গুয়েজ মডেল", "আমি আপনাকে সাহায্য করতে প্রস্তুত", or "আমি বুঝতে পারছি". Instead, use natural conversational responses like a true friend.
 """
 
-# --- 8. SESSION MANAGEMENT (ANTI-CRASH DEEP MEMORY RESTORE LOGIC) ---
+# --- 8. SESSION MANAGEMENT (AUTO-HEALING & ANTI-CRASH LOGIC) ---
 def initialize_session(user_uid):
+    # Always check if the current loaded ID matches the URL ID
     if "loaded_uid" not in st.session_state or st.session_state.loaded_uid != user_uid:
         st.session_state.history = []
         gemini_history = []
         
         past_db_chats = get_past_memory_from_db(user_uid) 
         
+        # Build Display History (User sees up to 50 messages)
         for chat in past_db_chats:
             if "user" in chat and chat["user"]:
                 st.session_state.history.append({"role": "user", "content": chat["user"]})
             if "ai" in chat and chat["ai"]:
                 st.session_state.history.append({"role": "assistant", "content": chat["ai"]})
 
-        recent_chats_for_api = past_db_chats[-40:] 
+        # Build Gemini History (Optimized to last 20 messages to prevent overload)
+        recent_chats_for_api = past_db_chats[-20:] 
         
         for chat in recent_chats_for_api:
             u_text = chat.get("user", "").strip()
@@ -344,6 +347,7 @@ def initialize_session(user_uid):
         st.session_state.gemini_history = gemini_history
         st.session_state.loaded_uid = user_uid 
         
+        # Initialize Gemini Chat Object
         try:
             safety_settings = {
                 HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_NONE,
@@ -403,6 +407,10 @@ def main():
     display_daily_reminder_ticker()
     configure_api()
     
+    # Initialize Core System
+    if "chat" not in st.session_state:
+        pass # Will be handled by initialize_session
+        
     user_uid = get_or_create_uid()
     initialize_session(user_uid)
     display_sidebar()
@@ -468,13 +476,12 @@ def main():
                                 for chunk in response:
                                     if chunk.text:
                                         yield chunk.text
-                            except Exception as chunk_e:
-                                # Handles safety blocks gracefully inside the stream
+                            except Exception:
                                 pass
                                     
                         full_response = message_placeholder.write_stream(stream_data())
                         
-                        # FIX: Explicitly resolve the stream to prevent iteration error next time
+                        # Properly resolve the stream to prevent iteration errors
                         try:
                             response.resolve()
                         except:
@@ -484,10 +491,9 @@ def main():
                         save_chat_to_db(prompt, full_response, user_uid)
                         
                     except Exception as e:
-                        try: st.session_state.chat.rewind()
-                        except: pass
-                        
-                        # FIX: Auto-heal the corrupted chat session for the next run
+                        # AUTO-HEALING TRIGGERED: Destroy corrupted chat object
+                        if "chat" in st.session_state:
+                            del st.session_state.chat
                         if "loaded_uid" in st.session_state:
                             del st.session_state.loaded_uid
                             
@@ -495,10 +501,12 @@ def main():
                             st.session_state.history.pop()
                             
                         error_msg = str(e).lower()
-                        if "429" in error_msg or "quota" in error_msg:
+                        if "iteration" in error_msg or "resolve" in error_msg:
+                            message_placeholder.error("⚠️ আগের মেসেজটি সম্পূর্ণ হওয়ার আগেই কানেকশন কেটে গিয়েছিল। সিস্টেমটি অটো-ফিক্স করা হয়েছে। অনুগ্রহ করে আপনার মেসেজটি আবার সেন্ড করুন।")
+                        elif "429" in error_msg or "quota" in error_msg:
                             message_placeholder.warning("⏳ সার্ভারে অনেক চাপ! দয়া করে একটু অপেক্ষা করে আবার প্রশ্ন করুন।")
                         else:
-                            message_placeholder.error(f"⚠️ নেটওয়ার্ক বা হিস্ট্রি সমস্যার কারণে উত্তরটি জেনারেট হতে পারেনি। অনুগ্রহ করে পেজটি রিলোড (Refresh) করে আবার চেষ্টা করুন।\n\nError Details: {e}")
+                            message_placeholder.error(f"⚠️ সাময়িক সমস্যার কারণে উত্তরটি জেনারেট হতে পারেনি। অনুগ্রহ করে আবার চেষ্টা করুন।\n\nError: {e}")
             except Exception as e:
                 message_placeholder.error(f"Processing Error: {e}")
 
