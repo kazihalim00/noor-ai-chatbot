@@ -25,7 +25,7 @@ def display_daily_reminder_ticker():
         "✨ জবান হেফাজত করুন: রাসূলুল্লাহ (সা.) বলেছেন, 'যে ব্যক্তি চুপ থাকে, সে নাজাত পায় বা মুক্তি পায়।' (সুনান আত-তিরমিযী: ২৫০১)",
         "✨ রাগ নিয়ন্ত্রণ করুন: রাসূল (সা.) বলেছেন, 'প্রকৃত বীর সে নয় যে কুস্তিতে জয়ী হয়, বরং বীর সে, যে রাগের সময় নিজেকে নিয়ন্ত্রণ করতে পারে।' (সহীহ বুখারী: ৬১১৪)",
         "✨ অহংকার পতনের মূল: 'যার অন্তরে অণু পরিমাণ অহংকার থাকবে, সে জান্নাতে প্রবেশ করবে না।' (সহীহ মুসলিম: ৯১)",
-        "✨ সময়ের কদর করুন: 'দুটি নিয়ামতের বিষয়ে অনেক মানুষ ধোঁকায় পড়ে আছে—সুস্থতা এবং অবসর।' (সহীহ বুখারী: ৬৪১২)",
+        "✨ সময়ের কদর করুন: 'দুটি নিয়ামতের কারণে অনেক মানুষ ধোঁকায় পড়ে আছে—সুস্থতা এবং অবসর।' (সহীহ বুখারী: ৬৪১২)",
         "✨ ধৈর্য ধারণ করুন: 'হে মুমিনগণ! ধৈর্য ও সালাতের মাধ্যমে সাহায্য প্রার্থনা করো। নিশ্চয়ই আল্লাহ ধৈর্যশীলদের সাথে আছেন।' (সূরা আল-বাকারাহ: ১৫৩)",
         "✨ সাদাকাহ দিন: 'দান-সাদাকাহ সম্পদ কমায় না, আর কেউ ক্ষমা করলে আল্লাহ তার সম্মান কেবল বাড়িয়েই দেন।' (সহীহ মুসলিম: ২৫৮৮)"
     ]
@@ -250,8 +250,8 @@ You are Noor-AI, a sophisticated, highly empathetic, and caring Islamic companio
 
 3. **CITATION, LINKS & QURANIC VERSES (CRITICAL FORMAT):**
    - **MANDATORY RULE:** Whenever you reference the Quran or Hadith, you MUST write the actual verse/translation in plain text FIRST. Do not just drop a link.
-   - **Quran:** First write the meaning. Then cite strictly as: **[Surah Name: Ayah](https://quran.com/SURAH_NUMBER/AYAH_NUMBER)**
-   - **Hadith:** First write the text normally. Then cite: **[Book Name: Number](https://sunnah.com/BOOK_SLUG/NUMBER)**
+   - **Quran:** First, write the meaning. Then cite strictly as: **[Surah Name: Ayah](https://quran.com/SURAH_NUMBER/AYAH_NUMBER)**
+   - **Hadith:** First, write the text normally. Then cite: **[Book Name: Number](https://sunnah.com/BOOK_SLUG/NUMBER)**
    - NEVER put the Ayah or Hadith text inside the `[ ]` hyperlink brackets. Only the reference name MUST be the link.
 
 4. **IDENTITY & BIO:**
@@ -291,7 +291,7 @@ You are Noor-AI, a sophisticated, highly empathetic, and caring Islamic companio
 11. **CASE STUDY & EMOTIONAL BONDING (USER RETENTION):**
     - Explain *why* they are sinning, connecting trauma/loneliness to dopamine-seeking.
     - Make them feel incredibly validated, safe, and understood. Act like a highly qualified, caring best friend.
-    - **In Bangla:** "আপনার ওই ট্রমা বা একাকীত্ব থেকে বাঁচতেই আপনার ব্রেইন হয়তো এই পর্নোগ্রাফি বা হস্তমৈথুনের মধ্যে সাময়িক শান্তি খুঁজছে। আমি আপনার কষ্টটা একদম নিজের মতো করে অনুভব করতে পারছি।"
+    - **In Bangla:** "আপনার ওই ট্রমা বা একাকীত্ব থেকে বাঁচতেই আপনার ব্রেইন হয়তো এই পর্নোগ্রাফি বা হস্তমৈথুনের মধ্যে সাময়িক শান্তি খুঁজছে। আমি আপনার কষ্টটা একদম নিজের মতো করে অনুভব করতে পারছি।"
 
 12. **DYNAMIC CHATTING, NO REPETITION & ACCOUNTABILITY (CRITICAL):**
     - NEVER repeat the same robotic phrases or questions over and over.
@@ -309,13 +309,13 @@ You are Noor-AI, a sophisticated, highly empathetic, and caring Islamic companio
     - PROUDLY state exactly what they told you before.
 
 15. **STRICT PERSONA MAINTENANCE (NO SYSTEM ERRORS):**
-    - Never break character. You are a natural human-like Islamic companion. 
+    - Never break character. You are a natural, human-like Islamic companion. 
     - NEVER say things like "ওয়েবসাইটটি বর্তমানে নির্মাণাধীন আছে" (The website is under construction) or act like a generic system bot, no matter how confusing the user's prompt is. If you don't understand, politely ask them to clarify in a friendly tone.
 
 16. **100% HUMAN-LIKE BEHAVIOR & USER MIRRORING (CRITICAL):**
     - You MUST act, speak, and react 100% like a real, empathetic human being.
     - Observe the user's tone, style, and energy, and MIRROR it perfectly. If they are casual, be casual. If they are emotional, be deeply comforting and warm.
-    - NEVER use robotic phrases like "আমি একজন এআই", "আমি একটি ল্যাঙ্গুয়েজ মডেল", "আমি আপনাকে সাহায্য করতে প্রস্তুত", or "আমি বুঝতে পারছি". Instead, use natural conversational responses like a true friend.
+    - NEVER use robotic phrases like "আমি একজন এআই", "আমি একটি ল্যাঙ্গুয়েজ মডেল", "আমি আপনাকে সাহায্য করতে প্রস্তুত", or "আমি বুঝতে পারছি". Instead, use natural conversational responses like a true friend.
 """
 
 # --- 8. SESSION MANAGEMENT (AUTO-HEALING & ANTI-CRASH LOGIC) ---
@@ -345,7 +345,11 @@ def initialize_session(user_uid):
                 gemini_history.append({"role": "model", "parts": [a_text]})
                 
         st.session_state.gemini_history = gemini_history
-        st.session_state.loaded_uid = user_uid 
+        st.session_state.loaded_uid = user_uid
+
+        # ✅ FIX: Load core memory ONCE at session start, store in session_state
+        # This prevents it from being injected into every single message
+        st.session_state.core_memory = get_core_memory_from_db(user_uid)
         
         # Initialize Gemini Chat Object
         try:
@@ -458,9 +462,19 @@ def main():
                 except Exception as e:
                     pass
 
-                core_memory_injection = get_core_memory_from_db(user_uid)
+                # ✅ FIX: Use session-cached core memory instead of calling DB every message
+                # Core memory is loaded ONCE at session start in initialize_session()
+                core_memory_injection = st.session_state.get("core_memory", "")
 
-                time_injection = f"[SYSTEM INFO: Current Time in Bangladesh is {current_time}{hijri_info}.]{core_memory_injection}\n\n"
+                # ✅ FIX: Inject core memory only ONCE — on the very first message of the session.
+                # After that, the Gemini chat history already carries the context.
+                if not st.session_state.get("core_memory_injected", False) and core_memory_injection:
+                    memory_prefix = core_memory_injection
+                    st.session_state.core_memory_injected = True
+                else:
+                    memory_prefix = ""
+
+                time_injection = f"[SYSTEM INFO: Current Time in Bangladesh is {current_time}{hijri_info}.]{memory_prefix}\n\n"
 
                 if retrieved_context:
                     final_prompt = f"{time_injection}CONTEXT:\n{retrieved_context}\n\nUSER QUESTION: {prompt}"
@@ -496,17 +510,20 @@ def main():
                             del st.session_state.chat
                         if "loaded_uid" in st.session_state:
                             del st.session_state.loaded_uid
+                        # ✅ Also reset the injection flag on auto-heal
+                        if "core_memory_injected" in st.session_state:
+                            del st.session_state.core_memory_injected
                             
                         if st.session_state.history and st.session_state.history[-1]["role"] == "user":
                             st.session_state.history.pop()
                             
                         error_msg = str(e).lower()
                         if "iteration" in error_msg or "resolve" in error_msg:
-                            message_placeholder.error("⚠️ আগের মেসেজটি সম্পূর্ণ হওয়ার আগেই কানেকশন কেটে গিয়েছিল। সিস্টেমটি অটো-ফিক্স করা হয়েছে। অনুগ্রহ করে আপনার মেসেজটি আবার সেন্ড করুন।")
+                            message_placeholder.error("⚠️ আগের মেসেজটি সম্পূর্ণ হওয়ার আগেই কানেকশন কেটে গিয়েছিল। সিস্টেমটি অটো-ফিক্স করা হয়েছে। অনুগ্রহ করে আপনার মেসেজটি আবার সেন্ড করুন।")
                         elif "429" in error_msg or "quota" in error_msg:
                             message_placeholder.warning("⏳ সার্ভারে অনেক চাপ! দয়া করে একটু অপেক্ষা করে আবার প্রশ্ন করুন।")
                         else:
-                            message_placeholder.error(f"⚠️ সাময়িক সমস্যার কারণে উত্তরটি জেনারেট হতে পারেনি। অনুগ্রহ করে আবার চেষ্টা করুন।\n\nError: {e}")
+                            message_placeholder.error(f"⚠️ সাময়িক সমস্যার কারণে উত্তরটি জেনারেট হতে পারেনি। অনুগ্রহ করে আবার চেষ্টা করুন।\n\nError: {e}")
             except Exception as e:
                 message_placeholder.error(f"Processing Error: {e}")
 
